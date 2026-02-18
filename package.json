@@ -17,7 +17,15 @@
     "db:generate": "turbo -F @infra-scope/db db:generate",
     "db:migrate": "turbo -F @infra-scope/db db:migrate"
   },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  },
   "devDependencies": {
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.8.1",
     "turbo": "^2.6.3",
     "typescript": "^5"
   }

@@ -1,0 +1,3 @@
+{
+  "extends": "@infra-scope/config/tsconfig.base.json",
+}
