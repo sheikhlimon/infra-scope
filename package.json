@@ -1,0 +1,24 @@
+{
+  "name": "infra-scope",
+  "private": true,
+  "type": "module",
+  "packageManager": "npm@10.9.4",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "db:push": "turbo -F @infra-scope/db db:push",
+    "db:studio": "turbo -F @infra-scope/db db:studio",
+    "db:generate": "turbo -F @infra-scope/db db:generate",
+    "db:migrate": "turbo -F @infra-scope/db db:migrate"
+  },
+  "devDependencies": {
+    "turbo": "^2.6.3",
+    "typescript": "^5"
+  }
+}

@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int          @id @default(autoincrement())
+  email     String       @unique
+  password  String
+  role      Role         @default(USER)
+  systems   System[]
+  logs      ActivityLog[]
+  createdAt DateTime     @default(now())
+}
+
+model System {
+  id                     Int          @id @default(autoincrement())
+  hostname               String
+  ipAddress              String
+  os                     String
+  cpuCores               Int?
+  memoryGB               Int?
+  status                 SystemStatus @default(INACTIVE)
+  connectionType         String       @default("manual")
+  credentialsConfigured Boolean      @default(false)
+  ownerId                Int
+  owner                  User         @relation(fields: [ownerId], references: [id])
+  lastScannedAt          DateTime?
+  logs                   ActivityLog[]
+  createdAt              DateTime     @default(now())
+}
+
+model ActivityLog {
+  id        Int      @id @default(autoincrement())
+  action    String
+  userId    Int
+  systemId  Int?
+  user      User     @relation(fields: [userId], references: [id])
+  system    System?  @relation(fields: [systemId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum SystemStatus {
+  ACTIVE
+  INACTIVE
+  SCANNING
+  ERROR
+}

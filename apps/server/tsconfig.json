@@ -1,0 +1,9 @@
+{
+  "extends": "@infra-scope/config/tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "moduleResolution": "node"
+  },
+  "include": ["src/**/*"]
+}
