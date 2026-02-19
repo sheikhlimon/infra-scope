@@ -30,5 +30,11 @@
     "prettier": "^3.8.1",
     "turbo": "^2.6.3",
     "typescript": "^5"
+  },
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.574.0",
+    "tailwind-merge": "^3.5.0"
   }
 }

@@ -21,7 +21,7 @@
 
 ## Current Task
 
-**NEXT**: Phase 5 - Frontend Setup (apps/web structure, Tailwind, shadcn/ui)
+**NEXT**: Phase 6 - Frontend Auth Pages (login, register)
 
 ---
 
@@ -65,11 +65,11 @@
 - [x] Integrate into existing services
 
 ### Phase 5: Frontend - Setup
-- [ ] Add shadcn components: Button, Card, Input, Label, Badge, Table, Dialog, Toast
-- [ ] Create fetch API wrapper
-- [ ] Set up auth context
-- [ ] Create protected route wrapper
-- [ ] Build layout with nav using shadcn components
+- [x] Add shadcn components: Button, Card, Input, Label, Badge, Table, Dialog, Toast
+- [x] Create fetch API wrapper (lib/api.ts)
+- [x] Set up auth context (contexts/auth-context.tsx)
+- [x] Create protected route wrapper (components/protected-route.tsx)
+- [x] Root layout with AuthProvider + Toaster
 
 ### Phase 6: Frontend - Auth
 - [ ] apps/web/app/(auth)/login/page.tsx
@@ -132,3 +132,4 @@
 - e8a20a3 chore: remove unnecessary comments from role middleware
 - 25499d8 feat: add activity logging service and integrate with auth/systems
 - 936ccd2 chore: update frontend rules - nextjs 15, anti-ai-patterns
+- f44e7bc feat: add nextjs 15 frontend with tailwind
