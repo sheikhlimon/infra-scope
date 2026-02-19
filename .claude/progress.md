@@ -131,3 +131,4 @@
 - 41daa00 feat: add scan simulation endpoint and clean up comments
 - e8a20a3 chore: remove unnecessary comments from role middleware
 - 25499d8 feat: add activity logging service and integrate with auth/systems
+- 936ccd2 chore: update frontend rules - nextjs 15, anti-ai-patterns
