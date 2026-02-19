@@ -58,3 +58,15 @@ export async function deleteSystemController(req: AuthRequest, res: Response) {
     res.status(status).json({ error: message });
   }
 }
+
+export async function scanSystemController(req: AuthRequest, res: Response) {
+  try {
+    const id = parseInt(req.params.id!);
+    const system = await SystemService.scanSystem(id, req.user!.userId, req.user!.role);
+    res.status(200).json(system);
+  } catch (error) {
+    const message = (error as Error).message;
+    const status = message === "System not found" ? 404 : message === "Access denied" ? 403 : 500;
+    res.status(status).json({ error: message });
+  }
+}

@@ -15,6 +15,7 @@ export async function createSystem(userId: number, data: CreateSystemInput) {
 }
 
 export async function getSystems(userId: number, userRole: string) {
+  // Admins see all systems, users only see their own
   if (userRole === "ADMIN") {
     return await prisma.system.findMany({
       include: { owner: { select: { id: true, email: true } } },
@@ -76,4 +77,37 @@ export async function deleteSystem(id: number, userId: number, userRole: string)
 
   await prisma.system.delete({ where: { id } });
   return { message: "System deleted" };
+}
+
+export async function scanSystem(id: number, userId: number, userRole: string) {
+  const system = await prisma.system.findUnique({ where: { id } });
+
+  if (!system) {
+    throw new Error("System not found");
+  }
+
+  if (userRole !== "ADMIN" && system.ownerId !== userId) {
+    throw new Error("Access denied");
+  }
+
+  // Set status to scanning
+  await prisma.system.update({ where: { id }, data: { status: "SCANNING" } });
+
+  // Simulate scan delay (3 seconds)
+  await new Promise(resolve => {
+    // eslint-disable-next-line no-undef
+    setTimeout(resolve, 3000);
+  });
+
+  // 80% success rate
+  const success = Math.random() > 0.2;
+  const status = success ? "ACTIVE" : "ERROR";
+
+  const updated = await prisma.system.update({
+    where: { id },
+    data: { status, lastScannedAt: new Date() },
+    include: { owner: { select: { id: true, email: true } } },
+  });
+
+  return updated;
 }
