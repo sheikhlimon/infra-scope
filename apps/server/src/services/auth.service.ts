@@ -1,6 +1,7 @@
 import { prisma } from "@infra-scope/db";
 import { hashPassword, comparePasswords } from "../utils/password.js";
 import { signToken } from "../utils/jwt.js";
+import * as ActivityService from "../services/activity.service.js";
 
 export async function register(email: string, password: string) {
   const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -17,6 +18,7 @@ export async function register(email: string, password: string) {
   });
 
   const token = signToken({ userId: user.id, role: user.role });
+  await ActivityService.logActivity("registered", user.id);
   return { user, token };
 }
 
@@ -32,5 +34,6 @@ export async function login(email: string, password: string) {
   }
 
   const token = signToken({ userId: user.id, role: user.role });
+  await ActivityService.logActivity("logged in", user.id);
   return { user, token };
 }
