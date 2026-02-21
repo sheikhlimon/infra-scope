@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { api } from '@/lib/api'
 import { useToast } from '@/hooks/use-toast'
+import { useAuth } from '@/contexts/auth-context'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -20,6 +21,7 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
+  const { login } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -37,11 +39,8 @@ export default function RegisterPage() {
 
     try {
       await api.post('/auth/register', { name, email, password })
-      toast({
-        title: 'ACCOUNT_CREATED',
-        description: 'You can now authenticate with your credentials',
-      })
-      router.push('/login')
+      await login(email, password)
+      router.push('/dashboard')
     } catch (err) {
       toast({
         title: 'REGISTRATION_FAILED',
