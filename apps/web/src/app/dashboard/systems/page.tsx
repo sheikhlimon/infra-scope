@@ -54,7 +54,7 @@ interface System {
 const statusConfig = {
   ACTIVE: {
     label: 'ACTIVE',
-    className: 'bg-emerald-950/30 text-emerald-400 border-emerald-500/30 shadow-[0_0_8px_rgba(52,211,153,0.15)]',
+    className: 'bg-emerald-950/70 text-emerald-400 border-emerald-500/40 shadow-[0_0_8px_rgba(52,211,153,0.15)]',
     dot: 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]',
   },
   INACTIVE: {
@@ -64,12 +64,12 @@ const statusConfig = {
   },
   SCANNING: {
     label: 'SCANNING',
-    className: 'bg-amber-950/30 text-amber-400 border-amber-500/30 shadow-[0_0_8px_rgba(251,191,36,0.15)]',
+    className: 'bg-amber-950/70 text-amber-400 border-amber-500/40 shadow-[0_0_8px_rgba(251,191,36,0.15)]',
     dot: 'bg-amber-400 animate-pulse shadow-[0_0_6px_rgba(251,191,36,0.8)]',
   },
   ERROR: {
     label: 'ERROR',
-    className: 'bg-rose-950/30 text-rose-400 border-rose-500/30 shadow-[0_0_8px_rgba(251,113,133,0.15)]',
+    className: 'bg-rose-950/70 text-rose-400 border-rose-500/40 shadow-[0_0_8px_rgba(251,113,133,0.15)]',
     dot: 'bg-rose-400 shadow-[0_0_6px_rgba(251,113,133,0.8)]',
   },
 }

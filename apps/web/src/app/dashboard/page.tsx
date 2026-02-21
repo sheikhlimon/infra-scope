@@ -56,10 +56,10 @@ interface StatsData {
 }
 
 const STATUS_CONFIG = {
-  ACTIVE: { label: 'Healthy', color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/50' },
+  ACTIVE: { label: 'Healthy', color: 'text-emerald-400', bg: 'bg-emerald-950/70', border: 'border-emerald-500/40' },
   INACTIVE: { label: 'Inactive', color: 'text-muted-foreground', bg: 'bg-muted/50', border: 'border-muted-foreground/50' },
-  SCANNING: { label: 'Scanning', color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/50' },
-  ERROR: { label: 'Error', color: 'text-rose-500', bg: 'bg-rose-500/10', border: 'border-rose-500/50' },
+  SCANNING: { label: 'Scanning', color: 'text-amber-400', bg: 'bg-amber-950/70', border: 'border-amber-500/40' },
+  ERROR: { label: 'Error', color: 'text-rose-400', bg: 'bg-rose-950/70', border: 'border-rose-500/40' },
 } as const
 
 function getStatusCount(stats: StatusStats[], status: string) {
@@ -108,9 +108,9 @@ function DashboardContent() {
 
   const statCards = [
     { label: 'Total Systems', value: stats.total, icon: Server, color: 'text-foreground' },
-    { label: 'Healthy', value: activeCount, change: `${healthyPercentage}%`, icon: CheckCircle2, color: 'text-emerald-500' },
-    { label: 'Scanning', value: scanningCount, change: scanningCount > 0 ? 'Active' : 'Idle', icon: Activity, color: 'text-amber-500' },
-    { label: 'Errors', value: errorCount, change: errorCount > 0 ? 'Fix now' : 'Clear', icon: AlertTriangle, color: 'text-rose-500' },
+    { label: 'Healthy', value: activeCount, change: `${healthyPercentage}%`, icon: CheckCircle2, color: 'text-emerald-400' },
+    { label: 'Scanning', value: scanningCount, change: scanningCount > 0 ? 'Active' : 'Idle', icon: Activity, color: 'text-amber-400' },
+    { label: 'Errors', value: errorCount, change: errorCount > 0 ? 'Fix now' : 'Clear', icon: AlertTriangle, color: 'text-rose-400' },
   ]
 
   return (
