@@ -109,14 +109,15 @@ export default function ActivityPage() {
 
   const fetchLogs = async () => {
     try {
-      const data = await api.get<{ logs: ActivityLog[] }>('/activity')
-      setLogs(data.logs)
+      const data = await api.get<ActivityLog[]>('/activity')
+      setLogs(Array.isArray(data) ? data : [])
     } catch (err) {
       toast({
         title: 'Failed to load activity',
         description: err instanceof Error ? err.message : 'Please try again',
         variant: 'destructive',
       })
+      setLogs([])
     } finally {
       setLoading(false)
     }

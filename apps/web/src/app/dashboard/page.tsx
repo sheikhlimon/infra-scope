@@ -259,25 +259,34 @@ function DashboardContent() {
         </div>
 
         <div className="space-y-4">
-          {stats.recent.map((item) => (
-            <div key={item.id} className="flex gap-3">
-              <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 bg-primary/60" />
-              <div className="space-y-0.5 flex-1 min-w-0">
-                <p className="text-xs font-medium text-foreground">
-                  {item.system?.hostname || 'System'}: {item.action}
-                </p>
-                <div className="flex items-center gap-2">
-                  <p className="text-[11px] text-muted-foreground">
-                    {item.user.email}
+          {stats.recent.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-xs text-muted-foreground font-mono">NO_RECENT_ACTIVITY</p>
+              <p className="text-[10px] text-muted-foreground/60 font-mono mt-1">
+                Actions will appear here as you use the system
+              </p>
+            </div>
+          ) : (
+            stats.recent.map((item) => (
+              <div key={item.id} className="flex gap-3">
+                <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 bg-primary/60" />
+                <div className="space-y-0.5 flex-1 min-w-0">
+                  <p className="text-xs font-medium text-foreground">
+                    {item.system?.hostname || 'System'}: {item.action}
                   </p>
-                  <span className="text-muted-foreground/30">•</span>
-                  <p className="text-[10px] text-muted-foreground font-mono">
-                    {new Date(item.createdAt).toLocaleString()}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-[11px] text-muted-foreground">
+                      {item.user.email}
+                    </p>
+                    <span className="text-muted-foreground/30">•</span>
+                    <p className="text-[10px] text-muted-foreground font-mono">
+                      {new Date(item.createdAt).toLocaleString()}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </Card>
     </div>
