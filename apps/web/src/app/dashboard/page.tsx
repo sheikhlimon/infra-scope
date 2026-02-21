@@ -104,9 +104,11 @@ function DashboardContent() {
   const scanningCount = getStatusCount(stats.byStatus, 'SCANNING')
   const errorCount = getStatusCount(stats.byStatus, 'ERROR')
 
+  const healthyPercentage = stats.total > 0 ? Math.round((activeCount / stats.total) * 100) : 0
+
   const statCards = [
     { label: 'Total Systems', value: stats.total, icon: Server, color: 'text-foreground' },
-    { label: 'Healthy', value: activeCount, change: `${Math.round((activeCount / stats.total) * 100)}%`, icon: CheckCircle2, color: 'text-emerald-500' },
+    { label: 'Healthy', value: activeCount, change: `${healthyPercentage}%`, icon: CheckCircle2, color: 'text-emerald-500' },
     { label: 'Scanning', value: scanningCount, change: scanningCount > 0 ? 'Active' : 'Idle', icon: Activity, color: 'text-amber-500' },
     { label: 'Errors', value: errorCount, change: errorCount > 0 ? 'Fix now' : 'Clear', icon: AlertTriangle, color: 'text-rose-500' },
   ]
