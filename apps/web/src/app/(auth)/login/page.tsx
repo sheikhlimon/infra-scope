@@ -8,8 +8,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card } from '@/components/ui/card'
-import { Shield, Lock, Eye, EyeOff } from 'lucide-react'
+import { Lock, Eye, EyeOff } from 'lucide-react'
 import Link from 'next/link'
+import { Logo } from '@/components/logo'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -54,7 +55,7 @@ export default function LoginPage() {
 
         <div className="text-primary-foreground p-8 relative z-10">
           <div className="flex items-center gap-3 mb-6">
-            <Shield className="h-8 w-8" />
+            <Logo size="lg" className="border-primary-foreground/60" inverted />
             <h1 className="text-2xl font-mono font-bold tracking-wider">
               INFRA<span className="text-primary-foreground/70">SCOPE</span>
             </h1>
@@ -90,9 +91,7 @@ export default function LoginPage() {
           <div className="p-8">
             {/* Header */}
             <div className="flex items-center gap-3 mb-8 pb-6 border-b border-border/40">
-              <div className="h-10 w-10 bg-primary flex items-center justify-center">
-                <Shield className="w-5 h-5 text-primary-foreground" />
-              </div>
+              <Logo size="lg" />
               <div>
                 <h1 className="text-xl font-mono font-bold tracking-wider text-foreground">
                   INFRA<span className="text-primary">SCOPE</span>
