@@ -21,7 +21,7 @@
 
 ## Current Task
 
-**NEXT**: Phase 7 - Frontend Dashboard (layout, systems, activity)
+**NEXT**: Phase 9 - Deploy (Neon DB, Render backend, Vercel frontend)
 
 ---
 
@@ -32,9 +32,9 @@
 - [x] .gitignore + .prettierrc
 - [x] packages/config/eslint + packages/config/tsconfig
 - [x] apps/server structure + package.json
-- [ ] apps/web structure + package.json
-- [ ] Husky + lint-staged setup
-- [ ] apps/web Tailwind + shadcn/ui setup (components/ui/*, lib/utils.ts)
+- [x] apps/web structure + package.json
+- [x] Husky + lint-staged setup
+- [x] apps/web Tailwind + shadcn/ui setup (components/ui/*, lib/utils.ts)
 - [x] packages/db (Prisma schema)
 
 ### Phase 2: Backend - Auth
@@ -55,10 +55,6 @@
 - [x] `apps/server/src/controllers/system.controller.ts` - Handle requests
 - [x] `apps/server/src/routes/system.routes.ts` - Mount endpoints
 - [x] Add scan simulation
-- [ ] `apps/server/src/middleware/role.middleware.ts` - Permission checks
-- [ ] `apps/server/src/controllers/system.controller.ts` - Handle requests
-- [ ] `apps/server/src/routes/system.routes.ts` - Mount endpoints
-- [ ] Add scan simulation
 
 ### Phase 4: Backend - Activity
 - [x] `apps/server/src/services/activity.service.ts` - Logging logic
@@ -81,13 +77,22 @@
 - [x] apps/web/app/dashboard/systems/page.tsx
 - [x] apps/web/app/dashboard/systems/new/page.tsx
 - [x] apps/web/app/dashboard/systems/[id]/page.tsx
-- [ ] apps/web/app/dashboard/activity/page.tsx
+- [x] apps/web/app/dashboard/activity/page.tsx
 
 ### Phase 8: Polish
 - [x] Search/filter/sort on systems list
 - [x] Loading states throughout
 - [x] Error handling + toasts
 - [x] Responsive design
+
+### Phase 8.5: Enhanced Features
+- [x] Analytics/Stats dashboard (charts, summaries)
+- [x] Pagination on systems list
+- [ ] Advanced form validation UI
+
+### Phase 8.75: Landing & Auth Flow
+- [x] Marketing landing page
+- [x] Login/Register redirect to dashboard
 
 ### Phase 9: Deploy
 - [ ] Set up Neon database
@@ -99,20 +104,20 @@
 ## MERN Requirements Checklist
 
 ### Mandatory (Need All)
-- [x] Authentication (planned)
-- [ ] CRUD (Systems: Create, Read, Update, Delete)
-- [ ] Dashboard (User view with summary/stats)
-- [ ] Responsive UI (Tailwind CSS + shadcn/ui)
+- [x] Authentication
+- [x] CRUD (Systems: Create, Read, Update, Delete)
+- [x] Dashboard (User view with summary/stats)
+- [x] Responsive UI (Tailwind CSS + shadcn/ui)
 
 ### Features (Pick 5+)
 - [x] Role-Based Access (Admin/User permissions)
-- [ ] Search, Filter & Sort
-- [ ] Activity & Notification System
-- [ ] Analytics Dashboard (Charts/visuals)
+- [x] Search, Filter & Sort
+- [x] Activity & Notification System
+- [x] Analytics Dashboard (Charts/visuals)
 - [x] Interactive UI (shadcn components + transitions)
 - [x] Reusable Architecture (Custom hooks, modular components)
 - [ ] Advanced Forms (Validation, error handling)
-- [ ] Optimized Data Handling (Pagination)
+- [x] Optimized Data Handling (Pagination)
 
 ---
 
