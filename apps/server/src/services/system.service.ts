@@ -12,7 +12,7 @@ export async function createSystem(userId: number, data: CreateSystemInput) {
       credentialsConfigured: data.credentialsConfigured || false,
     },
   });
-  await ActivityService.logActivity(`created system ${system.hostname}`, userId, system.id);
+  await ActivityService.logActivity("system.created", userId, system.id);
   return system;
 }
 
@@ -76,7 +76,7 @@ export async function updateSystem(id: number, userId: number, userRole: string,
     include: { owner: { select: { id: true, email: true } } },
   });
 
-  await ActivityService.logActivity(`updated system ${updated.hostname}`, userId, updated.id);
+  await ActivityService.logActivity("system.updated", userId, updated.id);
   return updated;
 }
 
@@ -92,7 +92,7 @@ export async function deleteSystem(id: number, userId: number, userRole: string)
   }
 
   await prisma.system.delete({ where: { id } });
-  await ActivityService.logActivity(`deleted system ${system.hostname}`, userId, id);
+  await ActivityService.logActivity("system.deleted", userId, id);
   return { message: "System deleted" };
 }
 
@@ -126,7 +126,7 @@ export async function scanSystem(id: number, userId: number, userRole: string) {
     include: { owner: { select: { id: true, email: true } } },
   });
 
-  await ActivityService.logActivity(`scanned system ${updated.hostname} (${status.toLowerCase()})`, userId, updated.id);
+  await ActivityService.logActivity("system.scanned", userId, updated.id);
   return updated;
 }
 

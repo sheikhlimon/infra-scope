@@ -18,7 +18,7 @@ export async function register(email: string, password: string) {
   });
 
   const token = signToken({ userId: user.id, role: user.role });
-  await ActivityService.logActivity("registered", user.id);
+  await ActivityService.logActivity("user.registered", user.id);
   return { user, token };
 }
 
@@ -34,6 +34,6 @@ export async function login(email: string, password: string) {
   }
 
   const token = signToken({ userId: user.id, role: user.role });
-  await ActivityService.logActivity("logged in", user.id);
+  await ActivityService.logActivity("user.login", user.id);
   return { user, token };
 }
