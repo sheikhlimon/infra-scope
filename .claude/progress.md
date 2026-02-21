@@ -93,6 +93,7 @@
 ### Phase 8.75: Landing & Auth Flow
 - [x] Marketing landing page
 - [x] Login/Register redirect to dashboard
+- [x] Consistent logo across all pages (component + favicon)
 
 ### Phase 9: Deploy
 - [ ] Set up Neon database

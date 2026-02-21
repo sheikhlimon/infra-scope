@@ -235,27 +235,6 @@ export default function ActivityPage() {
           )}
         </div>
       </Card>
-
-      {/* Legend */}
-      <Card className="p-4 border-border/60 bg-muted/10">
-        <div className="flex items-center gap-3 mb-3">
-          <Shield className="h-4 w-4 text-primary" />
-          <p className="text-xs font-mono font-medium">ACTION_TYPES</p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          {Object.entries(actionConfig).map(([key, { label, iconName, color, bg }]) => {
-            const Icon = iconMap[iconName]
-            return (
-              <div key={key} className="flex items-center gap-2">
-                <div className={`h-6 w-6 rounded border flex items-center justify-center ${bg}`}>
-                  <Icon className={`h-3.5 w-3.5 ${color}`} />
-                </div>
-                <span className="text-[10px] font-mono text-muted-foreground">{label}</span>
-              </div>
-            )
-          })}
-        </div>
-      </Card>
     </div>
   )
 }
