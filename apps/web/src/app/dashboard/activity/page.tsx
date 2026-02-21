@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, createElement } from 'react'
 import { useAuth } from '@/contexts/auth-context'
 import { api } from '@/lib/api'
 import { useToast } from '@/hooks/use-toast'
@@ -36,51 +36,61 @@ interface ActivityLog {
 
 const actionConfig: Record<
   string,
-  { label: string; icon: React.ReactNode; color: string; bg: string }
+  { label: string; iconName: 'user-plus' | 'key' | 'server' | 'edit' | 'trash-2' | 'refresh-cw' | 'file-text'; color: string; bg: string }
 > = {
   'user.registered': {
     label: 'USER_REGISTERED',
-    icon: <UserPlus className="h-3.5 w-3.5" />,
+    iconName: 'user-plus',
     color: 'text-emerald-400',
     bg: 'bg-emerald-950/30 border-emerald-500/30',
   },
   'user.login': {
     label: 'USER_LOGIN',
-    icon: <Key className="h-3.5 w-3.5" />,
+    iconName: 'key',
     color: 'text-muted-foreground',
     bg: 'bg-muted/30 border-border/50',
   },
   'system.created': {
     label: 'SYSTEM_CREATED',
-    icon: <Server className="h-3.5 w-3.5" />,
+    iconName: 'server',
     color: 'text-emerald-400',
     bg: 'bg-emerald-950/30 border-emerald-500/30',
   },
   'system.updated': {
     label: 'SYSTEM_UPDATED',
-    icon: <Edit className="h-3.5 w-3.5" />,
+    iconName: 'edit',
     color: 'text-blue-400',
     bg: 'bg-blue-950/30 border-blue-500/30',
   },
   'system.deleted': {
     label: 'SYSTEM_DELETED',
-    icon: <Trash2 className="h-3.5 w-3.5" />,
+    iconName: 'trash-2',
     color: 'text-rose-400',
     bg: 'bg-rose-950/30 border-rose-500/30',
   },
   'system.scanned': {
     label: 'SYSTEM_SCANNED',
-    icon: <RefreshCw className="h-3.5 w-3.5" />,
+    iconName: 'refresh-cw',
     color: 'text-amber-400',
     bg: 'bg-amber-950/30 border-amber-500/30',
   },
+}
+
+const iconMap: Record<string, React.ElementType> = {
+  'user-plus': UserPlus,
+  'key': Key,
+  'server': Server,
+  'edit': Edit,
+  'trash-2': Trash2,
+  'refresh-cw': RefreshCw,
+  'file-text': FileText,
 }
 
 const getActionConfig = (action: string) => {
   return (
     actionConfig[action] || {
       label: action.toUpperCase().replace('.', '_'),
-      icon: <FileText className="h-3.5 w-3.5" />,
+      iconName: 'file-text',
       color: 'text-muted-foreground',
       bg: 'bg-muted/30 border-border/50',
     }
@@ -180,7 +190,9 @@ export default function ActivityPage() {
                       <div
                         className={`h-7 w-7 rounded border flex items-center justify-center ${config.bg}`}
                       >
-                        <span className={config.color}>{config.icon}</span>
+                        {createElement(iconMap[config.iconName], {
+                          className: `h-3.5 w-3.5 ${config.color}`,
+                        })}
                       </div>
                       {index !== logs.length - 1 && (
                         <div className="w-px flex-1 bg-border/40 min-h-[3rem]" />
@@ -230,14 +242,17 @@ export default function ActivityPage() {
           <p className="text-xs font-mono font-medium">ACTION_TYPES</p>
         </div>
         <div className="flex flex-wrap gap-3">
-          {Object.entries(actionConfig).map(([key, { label, icon, color, bg }]) => (
-            <div key={key} className="flex items-center gap-2">
-              <div className={`h-6 w-6 rounded border flex items-center justify-center ${bg}`}>
-                <span className={color}>{icon}</span>
+          {Object.entries(actionConfig).map(([key, { label, iconName, color, bg }]) => {
+            const Icon = iconMap[iconName]
+            return (
+              <div key={key} className="flex items-center gap-2">
+                <div className={`h-6 w-6 rounded border flex items-center justify-center ${bg}`}>
+                  <Icon className={`h-3.5 w-3.5 ${color}`} />
+                </div>
+                <span className="text-[10px] font-mono text-muted-foreground">{label}</span>
               </div>
-              <span className="text-[10px] font-mono text-muted-foreground">{label}</span>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </Card>
     </div>
