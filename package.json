@@ -16,7 +16,7 @@
     "db:studio": "turbo -F @infra-scope/db db:studio",
     "db:generate": "turbo -F @infra-scope/db db:generate",
     "db:migrate": "turbo -F @infra-scope/db db:migrate",
-    "prepare": "husky"
+    "prepare": "node -e \"process.env.CI || require('child_process').execSync('husky', {stdio:'inherit'})\""
   },
   "lint-staged": {
     "*.{ts,tsx}": [
