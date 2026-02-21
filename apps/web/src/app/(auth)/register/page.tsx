@@ -54,6 +54,45 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex bg-background">
+      <div className="hidden md:flex md:w-1/3 bg-primary items-center justify-center relative overflow-hidden">
+        {/* Decorative grid pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `
+              linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px)
+            `,
+            backgroundSize: '32px 32px'
+          }} />
+        </div>
+
+        <div className="text-primary-foreground p-8 relative z-10">
+          <div className="flex items-center gap-3 mb-6">
+            <Shield className="h-8 w-8" />
+            <h1 className="text-2xl font-mono font-bold tracking-wider">
+              INFRA<span className="text-primary-foreground/70">SCOPE</span>
+            </h1>
+          </div>
+          <p className="text-primary-foreground/80 text-sm leading-relaxed mb-6">
+            Create your account and start monitoring your infrastructure.
+          </p>
+          <div className="space-y-2 font-mono text-xs text-primary-foreground/60">
+            <div className="flex items-center gap-2">
+              <div className="h-1 w-1 bg-primary-foreground/60" />
+              <span>Unlimited systems</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-1 w-1 bg-primary-foreground/60" />
+              <span>Activity tracking</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-1 w-1 bg-primary-foreground/60" />
+              <span>Real-time alerts</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="w-full md:w-2/3 flex items-center justify-center p-6">
         <Card className="w-full max-w-md border-border/60 relative overflow-hidden">
           {/* Corner accents */}
@@ -181,45 +220,6 @@ export default function RegisterPage() {
             </div>
           </div>
         </Card>
-      </div>
-
-      <div className="hidden md:flex md:w-1/3 bg-primary items-center justify-center relative overflow-hidden">
-        {/* Decorative grid pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `
-              linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
-              linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px)
-            `,
-            backgroundSize: '32px 32px'
-          }} />
-        </div>
-
-        <div className="text-primary-foreground p-8 relative z-10">
-          <div className="flex items-center gap-3 mb-6">
-            <Shield className="h-8 w-8" />
-            <h1 className="text-2xl font-mono font-bold tracking-wider">
-              INFRA<span className="text-primary-foreground/70">SCOPE</span>
-            </h1>
-          </div>
-          <p className="text-primary-foreground/80 text-sm leading-relaxed mb-6">
-            Create your account and start monitoring your infrastructure.
-          </p>
-          <div className="space-y-2 font-mono text-xs text-primary-foreground/60">
-            <div className="flex items-center gap-2">
-              <div className="h-1 w-1 bg-primary-foreground/60" />
-              <span>Unlimited systems</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="h-1 w-1 bg-primary-foreground/60" />
-              <span>Activity tracking</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="h-1 w-1 bg-primary-foreground/60" />
-              <span>Real-time alerts</span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   )
