@@ -78,7 +78,7 @@
 ### Phase 7: Frontend - Dashboard
 - [x] apps/web/app/dashboard/layout.tsx (with nav)
 - [x] apps/web/app/dashboard/page.tsx
-- [ ] apps/web/app/dashboard/systems/page.tsx
+- [x] apps/web/app/dashboard/systems/page.tsx
 - [ ] apps/web/app/dashboard/systems/new/page.tsx
 - [ ] apps/web/app/dashboard/systems/[id]/page.tsx
 - [ ] apps/web/app/dashboard/activity/page.tsx
@@ -139,3 +139,5 @@
 - 6632134 feat: add login page
 - 48b71ae feat: add register page
 - ec23445 feat: add dashboard layout with technical industrial design
+- 88614ef fix: add /api prefix to API_URL for correct routing
+- 71295ed feat: add systems list page with technical industrial design
