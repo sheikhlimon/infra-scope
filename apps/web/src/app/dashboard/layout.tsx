@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/auth-context'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Shield, Server, Activity, LogOut, Cpu, Menu, X } from 'lucide-react'
+import { Server, Activity, LogOut, Cpu, Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
@@ -37,10 +37,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <Menu className="w-5 h-5" />
           </button>
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-primary flex items-center justify-center">
-              <Shield className="w-4 h-4 text-primary-foreground" />
+            <div className="w-6 h-6 border-2 border-primary flex items-center justify-center">
+              <div className="w-2 h-2 bg-primary" />
             </div>
-            <span className="font-mono text-sm font-bold">INFRA<span className="text-primary">SCOPE</span></span>
+            <span className="font-mono text-sm font-bold tracking-tight">INFRA-SCOPE</span>
           </div>
         </div>
         <div className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
@@ -66,16 +66,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Brand */}
         <div className="p-4 md:p-6 border-b border-border/40 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-primary flex items-center justify-center">
-              <Shield className="w-5 h-5 text-primary-foreground" />
+            <div className="w-7 h-7 border-2 border-primary flex items-center justify-center">
+              <div className="w-2.5 h-2.5 bg-primary" />
             </div>
             <div>
-              <h1 className="font-mono text-sm font-bold tracking-wider text-foreground">
-                INFRA<span className="text-primary">SCOPE</span>
+              <h1 className="font-mono text-sm font-bold tracking-tight text-foreground">
+                INFRA-SCOPE
               </h1>
-              <p className="text-[10px] text-muted-foreground font-mono tracking-widest uppercase">
-                Monitoring
-              </p>
             </div>
           </div>
           <button
