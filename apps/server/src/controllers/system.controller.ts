@@ -70,3 +70,12 @@ export async function scanSystemController(req: AuthRequest, res: Response) {
     res.status(status).json({ error: message });
   }
 }
+
+export async function getSystemStatsController(req: AuthRequest, res: Response) {
+  try {
+    const stats = await SystemService.getSystemStats(req.user!.userId, req.user!.role);
+    res.status(200).json(stats);
+  } catch (error) {
+    res.status(500).json({ error: (error as Error).message });
+  }
+}

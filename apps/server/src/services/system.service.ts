@@ -116,3 +116,31 @@ export async function scanSystem(id: number, userId: number, userRole: string) {
   await ActivityService.logActivity(`scanned system ${updated.hostname} (${status.toLowerCase()})`, userId, updated.id);
   return updated;
 }
+
+export async function getSystemStats(userId: number, userRole: string) {
+  const where = userRole === "ADMIN" ? {} : { ownerId: userId };
+
+  const [total, byStatus, byOS, recent] = await Promise.all([
+    prisma.system.count({ where }),
+    prisma.system.groupBy({
+      by: ["status"],
+      where,
+      _count: { status: true },
+    }),
+    prisma.system.groupBy({
+      by: ["os"],
+      where,
+      _count: { os: true },
+      orderBy: { _count: { os: "desc" } },
+      take: 6,
+    }),
+    prisma.activityLog.findMany({
+      where: userRole === "ADMIN" ? {} : { userId },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      include: { user: { select: { email: true } }, system: { select: { hostname: true } } },
+    }),
+  ]);
+
+  return { total, byStatus, byOS, recent };
+}

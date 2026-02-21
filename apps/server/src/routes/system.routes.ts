@@ -11,6 +11,9 @@ router.use(authMiddleware);
 // GET /api/systems - List all systems (admin sees all, user sees own)
 router.get("/", SystemController.getSystemsController);
 
+// GET /api/systems/stats - Get aggregate statistics
+router.get("/stats", SystemController.getSystemStatsController);
+
 // POST /api/systems - Create new system
 router.post("/", SystemController.createSystemController);
 
