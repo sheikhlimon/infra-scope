@@ -79,7 +79,7 @@
 - [x] apps/web/app/dashboard/layout.tsx (with nav)
 - [x] apps/web/app/dashboard/page.tsx
 - [x] apps/web/app/dashboard/systems/page.tsx
-- [ ] apps/web/app/dashboard/systems/new/page.tsx
+- [x] apps/web/app/dashboard/systems/new/page.tsx
 - [ ] apps/web/app/dashboard/systems/[id]/page.tsx
 - [ ] apps/web/app/dashboard/activity/page.tsx
 
@@ -141,3 +141,4 @@
 - ec23445 feat: add dashboard layout with technical industrial design
 - 88614ef fix: add /api prefix to API_URL for correct routing
 - 71295ed feat: add systems list page with technical industrial design
+- b2809b2 feat: add new system form page with technical industrial design
