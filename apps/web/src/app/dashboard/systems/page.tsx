@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { api } from '@/lib/api'
 import { useToast } from '@/hooks/use-toast'
@@ -27,7 +27,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { Plus, Eye, RefreshCw, Trash2, Server, Activity, Search, X } from 'lucide-react'
+import { Plus, Eye, RefreshCw, Trash2, Server, Activity, Search, X, ChevronLeft, ChevronRight } from 'lucide-react'
+
+interface PaginatedSystemsResponse {
+  systems: System[]
+  pagination: {
+    total: number
+    page: number
+    limit: number
+    totalPages: number
+  }
+}
 
 interface System {
   id: number
@@ -65,24 +75,37 @@ const statusConfig = {
 }
 
 export default function SystemsPage() {
+  const searchParams = useSearchParams()
   const [systems, setSystems] = useState<System[]>([])
   const [loading, setLoading] = useState(true)
   const [scanning, setScanning] = useState<number | null>(null)
   const [deleteId, setDeleteId] = useState<number | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'INACTIVE' | 'SCANNING' | 'ERROR'>('ALL')
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [total, setTotal] = useState(0)
   const { user } = useAuth()
   const router = useRouter()
   const { toast } = useToast()
 
   useEffect(() => {
+    const pageParam = searchParams.get('page')
+    if (pageParam) {
+      setPage(parseInt(pageParam) || 1)
+    }
+  }, [searchParams])
+
+  useEffect(() => {
     fetchSystems()
-  }, [])
+  }, [page])
 
   const fetchSystems = async () => {
     try {
-      const data = await api.get<{ systems: System[] }>('/systems')
+      const data = await api.get<PaginatedSystemsResponse>(`/systems?page=${page}&limit=10`)
       setSystems(data.systems)
+      setTotalPages(data.pagination.totalPages)
+      setTotal(data.pagination.total)
     } catch (err) {
       toast({
         title: 'Failed to load systems',
@@ -136,6 +159,7 @@ export default function SystemsPage() {
   const activeCount = (systems || []).filter(s => s.status === 'ACTIVE').length
   const scanningCount = (systems || []).filter(s => s.status === 'SCANNING').length
   const errorCount = (systems || []).filter(s => s.status === 'ERROR').length
+  const safeSystems = systems || []
 
   const filteredSystems = (systems || []).filter(system => {
     const matchesSearch =
@@ -152,8 +176,6 @@ export default function SystemsPage() {
   }
 
   if (!user) return null
-
-  const safeSystems = systems || []
 
   return (
     <div className="space-y-6">
@@ -185,7 +207,7 @@ export default function SystemsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">Total</p>
-                <p className="text-lg font-mono font-bold">{safeSystems.length}</p>
+                <p className="text-lg font-mono font-bold">{total}</p>
               </div>
               <Server className="h-4 w-4 text-muted-foreground/50" />
             </div>
@@ -273,7 +295,7 @@ export default function SystemsPage() {
         </div>
         {filteredSystems.length !== safeSystems.length && (
           <p className="text-[10px] text-muted-foreground font-mono mt-3">
-            Showing {filteredSystems.length} of {safeSystems.length} systems
+            Showing {filteredSystems.length} of {total} systems
           </p>
         )}
       </Card>
@@ -556,6 +578,73 @@ export default function SystemsPage() {
           ))
         )}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <Card className="p-4 border-border/60">
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground font-mono">
+              PAGE_{page}_OF_{totalPages} • {total}_TOTAL
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const newPage = page - 1
+                  setPage(newPage)
+                  router.push(`/dashboard/systems?page=${newPage}`)
+                }}
+                disabled={page === 1}
+                className="font-mono text-xs h-8 rounded-sm"
+              >
+                <ChevronLeft className="h-3 w-3 mr-1" />
+                PREV
+              </Button>
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                  let pageNum = i + 1
+                  if (totalPages > 5 && page > 3) {
+                    pageNum = page - 3 + i
+                    if (pageNum > totalPages) pageNum = totalPages - (4 - i)
+                  }
+                  const isActive = pageNum === page
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => {
+                        setPage(pageNum)
+                        router.push(`/dashboard/systems?page=${pageNum}`)
+                      }}
+                      className={`w-8 h-8 text-xs font-mono rounded border transition-colors ${
+                        isActive
+                          ? 'bg-primary text-primary-foreground border-primary'
+                          : 'bg-background border-border/60 hover:bg-muted/20'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  )
+                })}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const newPage = page + 1
+                  setPage(newPage)
+                  router.push(`/dashboard/systems?page=${newPage}`)
+                }}
+                disabled={page === totalPages}
+                className="font-mono text-xs h-8 rounded-sm"
+              >
+                NEXT
+                <ChevronRight className="h-3 w-3 ml-1" />
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* Delete confirmation dialog */}
       <AlertDialog open={deleteId !== null} onOpenChange={() => setDeleteId(null)}>
