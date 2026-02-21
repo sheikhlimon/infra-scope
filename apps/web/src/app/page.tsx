@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { Logo } from '@/components/logo'
 import { ArrowRight, Shield, Terminal, Activity, Database, Zap, Lock } from 'lucide-react'
 
 const FEATURES = [
@@ -42,9 +43,7 @@ export default function LandingPage() {
       <nav className="border-b border-border/40">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 border-2 border-primary flex items-center justify-center">
-              <div className="w-2 h-2 bg-primary" />
-            </div>
+            <Logo size="md" />
             <span className="font-mono text-lg font-bold tracking-tight">INFRA-SCOPE</span>
           </div>
           <div className="flex items-center gap-4">
@@ -136,7 +135,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 border border-primary/60" />
+              <Logo size="sm" className="border-primary/60" />
               <span className="text-xs font-mono text-muted-foreground">INFRA-SCOPE</span>
             </div>
             <p className="text-xs text-muted-foreground font-mono">
