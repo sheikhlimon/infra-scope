@@ -21,7 +21,7 @@
 
 ## Current Task
 
-**NEXT**: Phase 6 - Frontend Auth Pages (login, register)
+**NEXT**: Phase 7 - Frontend Dashboard (layout, systems, activity)
 
 ---
 
@@ -72,11 +72,12 @@
 - [x] Root layout with AuthProvider + Toaster
 
 ### Phase 6: Frontend - Auth
-- [ ] apps/web/app/(auth)/login/page.tsx
-- [ ] apps/web/app/(auth)/register/page.tsx
+- [x] apps/web/app/(auth)/login/page.tsx
+- [x] apps/web/app/(auth)/register/page.tsx
 
 ### Phase 7: Frontend - Dashboard
-- [ ] apps/web/app/dashboard/page.tsx
+- [x] apps/web/app/dashboard/layout.tsx (with nav)
+- [x] apps/web/app/dashboard/page.tsx
 - [ ] apps/web/app/dashboard/systems/page.tsx
 - [ ] apps/web/app/dashboard/systems/new/page.tsx
 - [ ] apps/web/app/dashboard/systems/[id]/page.tsx
@@ -133,3 +134,8 @@
 - 25499d8 feat: add activity logging service and integrate with auth/systems
 - 936ccd2 chore: update frontend rules - nextjs 15, anti-ai-patterns
 - f44e7bc feat: add nextjs 15 frontend with tailwind
+- 2211f4a feat: add shadcn/ui setup and auth context
+- fbfa46b fix: add module type to web package.json
+- 6632134 feat: add login page
+- 48b71ae feat: add register page
+- ec23445 feat: add dashboard layout with technical industrial design
