@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { api } from '@/lib/api'
 import { useToast } from '@/hooks/use-toast'
@@ -83,11 +83,7 @@ export default function SystemDetailPage() {
   const [scanning, setScanning] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState(false)
 
-  useEffect(() => {
-    fetchSystem()
-  }, [id])
-
-  const fetchSystem = async () => {
+  const fetchSystem = useCallback(async () => {
     try {
       const data = await api.get<System>(`/systems/${id}`)
       setSystem(data)
@@ -104,7 +100,11 @@ export default function SystemDetailPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [id, toast])
+
+  useEffect(() => {
+    fetchSystem()
+  }, [fetchSystem])
 
   const handleScan = async () => {
     setScanning(true)

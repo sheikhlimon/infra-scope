@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, createElement } from 'react'
+import { useEffect, useState, createElement, useCallback } from 'react'
 import { useAuth } from '@/contexts/auth-context'
 import { api } from '@/lib/api'
 import { useToast } from '@/hooks/use-toast'
@@ -103,11 +103,7 @@ export default function ActivityPage() {
   const { user } = useAuth()
   const { toast } = useToast()
 
-  useEffect(() => {
-    fetchLogs()
-  }, [])
-
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async () => {
     try {
       const data = await api.get<ActivityLog[]>('/activity')
       setLogs(Array.isArray(data) ? data : [])
@@ -121,7 +117,11 @@ export default function ActivityPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [toast])
+
+  useEffect(() => {
+    fetchLogs()
+  }, [fetchLogs])
 
   if (!user) return null
 

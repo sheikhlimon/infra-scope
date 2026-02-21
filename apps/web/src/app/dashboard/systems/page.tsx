@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { api } from '@/lib/api'
@@ -74,7 +74,7 @@ const statusConfig = {
   },
 }
 
-export default function SystemsPage() {
+function SystemsContent() {
   const searchParams = useSearchParams()
   const [systems, setSystems] = useState<System[]>([])
   const [loading, setLoading] = useState(true)
@@ -96,11 +96,7 @@ export default function SystemsPage() {
     }
   }, [searchParams])
 
-  useEffect(() => {
-    fetchSystems()
-  }, [page])
-
-  const fetchSystems = async () => {
+  const fetchSystems = useCallback(async () => {
     try {
       const data = await api.get<PaginatedSystemsResponse>(`/systems?page=${page}&limit=10`)
       setSystems(data.systems)
@@ -115,7 +111,11 @@ export default function SystemsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [page, toast])
+
+  useEffect(() => {
+    fetchSystems()
+  }, [fetchSystems])
 
   const handleScan = async (id: number) => {
     setScanning(id)
@@ -674,5 +674,20 @@ export default function SystemsPage() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  )
+}
+
+export default function SystemsPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-6 w-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+          <p className="text-xs text-muted-foreground font-mono">LOADING_SYSTEMS...</p>
+        </div>
+      </div>
+    }>
+      <SystemsContent />
+    </Suspense>
   )
 }

@@ -152,3 +152,4 @@
 - 1124351 feat: add activity log page with timeline design
 - f8b8407 feat: add search and filter to systems list
 - 62c5751 feat: add responsive design - mobile sidebar and card view
+- 43e39f4 fix: build errors - add 'use client' where needed and fix suspense boundary
