@@ -41,38 +41,38 @@ const actionConfig: Record<
   'user.registered': {
     label: 'USER_REGISTERED',
     iconName: 'user-plus',
-    color: 'text-emerald-400',
-    bg: 'bg-emerald-950/30 border-emerald-500/30',
+    color: 'text-emerald-500',
+    bg: 'bg-emerald-500/10 border-emerald-500/40',
   },
   'user.login': {
     label: 'USER_LOGIN',
     iconName: 'key',
-    color: 'text-muted-foreground',
-    bg: 'bg-muted/30 border-border/50',
+    color: 'text-foreground',
+    bg: 'bg-muted/50 border-border/60',
   },
   'system.created': {
     label: 'SYSTEM_CREATED',
     iconName: 'server',
-    color: 'text-emerald-400',
-    bg: 'bg-emerald-950/30 border-emerald-500/30',
+    color: 'text-emerald-500',
+    bg: 'bg-emerald-500/10 border-emerald-500/40',
   },
   'system.updated': {
     label: 'SYSTEM_UPDATED',
     iconName: 'edit',
-    color: 'text-blue-400',
-    bg: 'bg-blue-950/30 border-blue-500/30',
+    color: 'text-blue-500',
+    bg: 'bg-blue-500/10 border-blue-500/40',
   },
   'system.deleted': {
     label: 'SYSTEM_DELETED',
     iconName: 'trash-2',
-    color: 'text-rose-400',
-    bg: 'bg-rose-950/30 border-rose-500/30',
+    color: 'text-rose-500',
+    bg: 'bg-rose-500/10 border-rose-500/40',
   },
   'system.scanned': {
     label: 'SYSTEM_SCANNED',
     iconName: 'refresh-cw',
-    color: 'text-amber-400',
-    bg: 'bg-amber-950/30 border-amber-500/30',
+    color: 'text-amber-500',
+    bg: 'bg-amber-500/10 border-amber-500/40',
   },
 }
 
@@ -188,10 +188,10 @@ export default function ActivityPage() {
                     {/* Timeline indicator */}
                     <div className="flex-shrink-0 flex flex-col items-center">
                       <div
-                        className={`h-7 w-7 rounded border flex items-center justify-center ${config.bg}`}
+                        className={`h-8 w-8 rounded border flex items-center justify-center ${config.bg}`}
                       >
                         {createElement(iconMap[config.iconName], {
-                          className: `h-3.5 w-3.5 ${config.color}`,
+                          className: `h-4 w-4 ${config.color}`,
                         })}
                       </div>
                       {index !== logs.length - 1 && (
