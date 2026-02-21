@@ -15,8 +15,10 @@ export async function createSystemController(req: AuthRequest, res: Response) {
 
 export async function getSystemsController(req: AuthRequest, res: Response) {
   try {
-    const systems = await SystemService.getSystems(req.user!.userId, req.user!.role);
-    res.status(200).json(systems);
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const result = await SystemService.getSystems(req.user!.userId, req.user!.role, page, limit);
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ error: (error as Error).message });
   }

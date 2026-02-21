@@ -16,17 +16,30 @@ export async function createSystem(userId: number, data: CreateSystemInput) {
   return system;
 }
 
-export async function getSystems(userId: number, userRole: string) {
-  // Admins see all systems, users only see their own
-  if (userRole === "ADMIN") {
-    return await prisma.system.findMany({
+export async function getSystems(userId: number, userRole: string, page = 1, limit = 10) {
+  const where = userRole === "ADMIN" ? {} : { ownerId: userId };
+  const skip = (page - 1) * limit;
+
+  const [systems, total] = await Promise.all([
+    prisma.system.findMany({
+      where,
       include: { owner: { select: { id: true, email: true } } },
-    });
-  }
-  return await prisma.system.findMany({
-    where: { ownerId: userId },
-    include: { owner: { select: { id: true, email: true } } },
-  });
+      skip,
+      take: limit,
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.system.count({ where }),
+  ]);
+
+  return {
+    systems,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
 }
 
 export async function getSystemById(id: number, userId: number, userRole: string) {
