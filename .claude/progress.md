@@ -80,7 +80,7 @@
 - [x] apps/web/app/dashboard/page.tsx
 - [x] apps/web/app/dashboard/systems/page.tsx
 - [x] apps/web/app/dashboard/systems/new/page.tsx
-- [ ] apps/web/app/dashboard/systems/[id]/page.tsx
+- [x] apps/web/app/dashboard/systems/[id]/page.tsx
 - [ ] apps/web/app/dashboard/activity/page.tsx
 
 ### Phase 8: Polish
@@ -142,3 +142,4 @@
 - 88614ef fix: add /api prefix to API_URL for correct routing
 - 71295ed feat: add systems list page with technical industrial design
 - b2809b2 feat: add new system form page with technical industrial design
+- d6ee76b feat: add system detail page with technical industrial design
