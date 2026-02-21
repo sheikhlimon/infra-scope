@@ -84,7 +84,7 @@
 - [ ] apps/web/app/dashboard/activity/page.tsx
 
 ### Phase 8: Polish
-- [ ] Search/filter/sort on systems list
+- [x] Search/filter/sort on systems list
 - [ ] Loading states throughout
 - [ ] Error handling + toasts
 - [ ] Responsive design
@@ -143,3 +143,5 @@
 - 71295ed feat: add systems list page with technical industrial design
 - b2809b2 feat: add new system form page with technical industrial design
 - d6ee76b feat: add system detail page with technical industrial design
+- 1124351 feat: add activity log page with timeline design
+- f8b8407 feat: add search and filter to systems list

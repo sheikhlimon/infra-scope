@@ -7,6 +7,7 @@ import { api } from '@/lib/api'
 import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import {
   Table,
@@ -26,7 +27,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { Plus, Eye, RefreshCw, Trash2, Server, Activity } from 'lucide-react'
+import { Plus, Eye, RefreshCw, Trash2, Server, Activity, Search, X } from 'lucide-react'
 
 interface System {
   id: number
@@ -68,6 +69,8 @@ export default function SystemsPage() {
   const [loading, setLoading] = useState(true)
   const [scanning, setScanning] = useState<number | null>(null)
   const [deleteId, setDeleteId] = useState<number | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'INACTIVE' | 'SCANNING' | 'ERROR'>('ALL')
   const { user } = useAuth()
   const router = useRouter()
   const { toast } = useToast()
@@ -133,6 +136,20 @@ export default function SystemsPage() {
   const activeCount = (systems || []).filter(s => s.status === 'ACTIVE').length
   const scanningCount = (systems || []).filter(s => s.status === 'SCANNING').length
   const errorCount = (systems || []).filter(s => s.status === 'ERROR').length
+
+  const filteredSystems = (systems || []).filter(system => {
+    const matchesSearch =
+      searchTerm === '' ||
+      system.hostname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      system.ipAddress.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesStatus = statusFilter === 'ALL' || system.status === statusFilter
+    return matchesSearch && matchesStatus
+  })
+
+  const clearFilters = () => {
+    setSearchTerm('')
+    setStatusFilter('ALL')
+  }
 
   if (!user) return null
 
@@ -206,6 +223,61 @@ export default function SystemsPage() {
         </div>
       </div>
 
+      {/* Filters */}
+      <Card className="p-4 border-border/60">
+        <div className="flex items-center gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search by hostname or IP..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="pl-10 font-mono text-sm bg-muted/20 border-border/60"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {(['ALL', 'ACTIVE', 'INACTIVE', 'SCANNING', 'ERROR'] as const).map(status => (
+              <button
+                key={status}
+                onClick={() => setStatusFilter(status)}
+                className={`px-3 py-1.5 text-[10px] font-mono uppercase border rounded transition-colors ${
+                  statusFilter === status
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-muted/20 text-muted-foreground border-border/60 hover:bg-muted/30'
+                }`}
+              >
+                {status === 'ALL' ? 'All' : status.toLowerCase()}
+              </button>
+            ))}
+          </div>
+          {(searchTerm || statusFilter !== 'ALL') && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearFilters}
+              className="font-mono text-xs h-8"
+            >
+              <X className="mr-2 h-3 w-3" />
+              Clear
+            </Button>
+          )}
+        </div>
+        {filteredSystems.length !== safeSystems.length && (
+          <p className="text-[10px] text-muted-foreground font-mono mt-3">
+            Showing {filteredSystems.length} of {safeSystems.length} systems
+          </p>
+        )}
+      </Card>
+
       {/* Systems table */}
       <Card className="border-border/60 relative overflow-hidden">
         {/* Corner accents */}
@@ -258,8 +330,30 @@ export default function SystemsPage() {
                   </div>
                 </TableCell>
               </TableRow>
+            ) : filteredSystems.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-12">
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="h-12 w-12 rounded-full border-2 border-dashed border-border/60 flex items-center justify-center">
+                      <Search className="h-5 w-5 text-muted-foreground/40" />
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground font-mono">NO_MATCHING_SYSTEMS</p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={clearFilters}
+                        className="font-mono text-xs"
+                      >
+                        <X className="mr-2 h-3 w-3" />
+                        CLEAR_FILTERS
+                      </Button>
+                    </div>
+                  </div>
+                </TableCell>
+              </TableRow>
             ) : (
-              systems.map((system) => (
+              filteredSystems.map((system) => (
                 <TableRow
                   key={system.id}
                   className="border-border/40 hover:bg-muted/10 transition-colors"
