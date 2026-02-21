@@ -41,8 +41,8 @@ const actionConfig: Record<
   'user.registered': {
     label: 'USER_REGISTERED',
     iconName: 'user-plus',
-    color: 'text-emerald-400',
-    bg: 'bg-emerald-950/70 border-emerald-500/40',
+    color: 'text-emerald-600',
+    bg: 'bg-emerald-50 border-emerald-200',
   },
   'user.login': {
     label: 'USER_LOGIN',
@@ -53,26 +53,26 @@ const actionConfig: Record<
   'system.created': {
     label: 'SYSTEM_CREATED',
     iconName: 'server',
-    color: 'text-emerald-400',
-    bg: 'bg-emerald-950/70 border-emerald-500/40',
+    color: 'text-emerald-600',
+    bg: 'bg-emerald-50 border-emerald-200',
   },
   'system.updated': {
     label: 'SYSTEM_UPDATED',
     iconName: 'edit',
-    color: 'text-blue-400',
-    bg: 'bg-blue-950/70 border-blue-500/40',
+    color: 'text-blue-600',
+    bg: 'bg-blue-50 border-blue-200',
   },
   'system.deleted': {
     label: 'SYSTEM_DELETED',
     iconName: 'trash-2',
-    color: 'text-rose-400',
-    bg: 'bg-rose-950/70 border-rose-500/40',
+    color: 'text-rose-600',
+    bg: 'bg-rose-50 border-rose-200',
   },
   'system.scanned': {
     label: 'SYSTEM_SCANNED',
     iconName: 'refresh-cw',
-    color: 'text-amber-400',
-    bg: 'bg-amber-950/70 border-amber-500/40',
+    color: 'text-amber-600',
+    bg: 'bg-amber-50 border-amber-200',
   },
 }
 

@@ -56,10 +56,10 @@ interface StatsData {
 }
 
 const STATUS_CONFIG = {
-  ACTIVE: { label: 'Healthy', color: 'text-emerald-400', bg: 'bg-emerald-950/70', border: 'border-emerald-500/40' },
+  ACTIVE: { label: 'Healthy', color: 'text-white', bg: 'bg-emerald-600', border: 'border-emerald-600' },
   INACTIVE: { label: 'Inactive', color: 'text-muted-foreground', bg: 'bg-muted/50', border: 'border-muted-foreground/50' },
-  SCANNING: { label: 'Scanning', color: 'text-amber-400', bg: 'bg-amber-950/70', border: 'border-amber-500/40' },
-  ERROR: { label: 'Error', color: 'text-rose-400', bg: 'bg-rose-950/70', border: 'border-rose-500/40' },
+  SCANNING: { label: 'Scanning', color: 'text-white', bg: 'bg-amber-500', border: 'border-amber-500' },
+  ERROR: { label: 'Error', color: 'text-white', bg: 'bg-rose-600', border: 'border-rose-600' },
 } as const
 
 function getStatusCount(stats: StatusStats[], status: string) {
@@ -193,7 +193,7 @@ function DashboardContent() {
                           </span>
                           <Badge
                             variant="outline"
-                            className={cn("text-[10px] font-mono px-1.5 py-0 rounded-sm", config.border, config.color)}
+                            className={cn("text-[10px] font-mono px-1.5 py-0 rounded-sm border-0", config.bg, config.color)}
                           >
                             {system.status}
                           </Badge>
