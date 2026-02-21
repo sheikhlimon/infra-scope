@@ -8,7 +8,7 @@ import { Plus, Activity, Server, AlertTriangle, CheckCircle2, Clock, Loader2 } f
 import { cn } from '@/lib/utils'
 import { api } from '@/lib/api'
 import { useEffect, useState } from 'react'
-import { toast } from 'sonner'
+import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 
 interface StatusStats {
@@ -27,6 +27,15 @@ interface ActivityItem {
   createdAt: string
   user: { email: string }
   system?: { hostname: string }
+}
+
+interface System {
+  id: number
+  hostname: string
+  ipAddress: string
+  os: string
+  status: string
+  lastScannedAt: string | null
 }
 
 interface StatsData {
@@ -49,21 +58,27 @@ function getStatusCount(stats: StatusStats[], status: string) {
 
 function DashboardContent() {
   const [stats, setStats] = useState<StatsData | null>(null)
+  const [systems, setSystems] = useState<System[]>([])
   const [loading, setLoading] = useState(true)
+  const { toast } = useToast()
 
   useEffect(() => {
-    async function fetchStats() {
+    async function fetchData() {
       try {
-        const data = await api.get<StatsData>('/systems/stats')
-        setStats(data)
+        const [statsData, systemsData] = await Promise.all([
+          api.get<StatsData>('/systems/stats'),
+          api.get<System[]>('/systems'),
+        ])
+        setStats(statsData)
+        setSystems(systemsData.slice(0, 5))
       } catch {
-        toast.error('Failed to load dashboard data')
+        toast({ title: 'Error', description: 'Failed to load dashboard data', variant: 'destructive' })
       } finally {
         setLoading(false)
       }
     }
-    fetchStats()
-  }, [])
+    fetchData()
+  }, [toast])
 
   if (loading) {
     return (
@@ -78,16 +93,13 @@ function DashboardContent() {
   const activeCount = getStatusCount(stats.byStatus, 'ACTIVE')
   const scanningCount = getStatusCount(stats.byStatus, 'SCANNING')
   const errorCount = getStatusCount(stats.byStatus, 'ERROR')
-  const inactiveCount = getStatusCount(stats.byStatus, 'INACTIVE')
 
   const statCards = [
     { label: 'Total Systems', value: stats.total, icon: Server, color: 'text-foreground' },
-    { label: 'Healthy', value: activeCount, change: `${Math.round((activeCount / stats.total) * 100)}% of total`, icon: CheckCircle2, color: 'text-emerald-500' },
-    { label: 'Scanning', value: scanningCount, change: scanningCount > 0 ? 'In progress' : 'Idle', icon: Activity, color: 'text-amber-500' },
-    { label: 'Errors', value: errorCount, change: errorCount > 0 ? 'Needs attention' : 'None', icon: AlertTriangle, color: 'text-rose-500' },
+    { label: 'Healthy', value: activeCount, change: `${Math.round((activeCount / stats.total) * 100)}%`, icon: CheckCircle2, color: 'text-emerald-500' },
+    { label: 'Scanning', value: scanningCount, change: scanningCount > 0 ? 'Active' : 'Idle', icon: Activity, color: 'text-amber-500' },
+    { label: 'Errors', value: errorCount, change: errorCount > 0 ? 'Fix now' : 'Clear', icon: AlertTriangle, color: 'text-rose-500' },
   ]
-
-  const maxOSCount = Math.max(...stats.byOS.map(s => s._count.os), 1)
 
   return (
     <div className="space-y-8">
@@ -137,8 +149,59 @@ function DashboardContent() {
 
       <div className="grid grid-cols-3 gap-6">
         <Card className="col-span-2 p-6 border-border/60">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-sm font-mono font-bold uppercase tracking-wider text-foreground">
+              Recent Systems
+            </h2>
+            <Link href="/dashboard/systems">
+              <Badge variant="outline" className="font-mono text-xs cursor-pointer hover:bg-muted/50">
+                View All
+              </Badge>
+            </Link>
+          </div>
+
+          <div className="space-y-3">
+            {systems.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-sm text-muted-foreground font-mono">No systems yet</p>
+                <Link href="/dashboard/systems/new">
+                  <Button className="mt-4 font-mono text-sm rounded-sm">Add First System</Button>
+                </Link>
+              </div>
+            ) : (
+              systems.map((system) => {
+                const config = STATUS_CONFIG[system.status as keyof typeof STATUS_CONFIG]
+                return (
+                  <Link key={system.id} href={`/dashboard/systems/${system.id}`}>
+                    <div className="flex items-center justify-between p-4 bg-muted/30 rounded-sm border border-border/40 hover:border-primary/40 transition-colors cursor-pointer">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-sm font-medium text-foreground">
+                            {system.hostname}
+                          </span>
+                          <Badge
+                            variant="outline"
+                            className={cn("text-[10px] font-mono px-1.5 py-0 rounded-sm", config.border, config.color)}
+                          >
+                            {system.status}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground font-mono">
+                          {system.ipAddress} • {system.os}
+                        </p>
+                      </div>
+                      <Clock className="w-4 h-4 text-muted-foreground" />
+                    </div>
+                  </Link>
+                )
+              })
+            )}
+          </div>
+        </Card>
+
+        <Card className="p-6 border-border/60">
           <h2 className="text-sm font-mono font-bold uppercase tracking-wider text-foreground mb-6">
-            Distribution by Status
+            Status Distribution
           </h2>
 
           <div className="space-y-4">
@@ -161,37 +224,6 @@ function DashboardContent() {
                   <div className="h-2 bg-muted/50 rounded-sm overflow-hidden">
                     <div
                       className={cn("h-full transition-all duration-500", config.bg)}
-                      style={{ width: `${percentage}%` }}
-                    />
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </Card>
-
-        <Card className="p-6 border-border/60">
-          <h2 className="text-sm font-mono font-bold uppercase tracking-wider text-foreground mb-6">
-            Operating Systems
-          </h2>
-
-          <div className="space-y-3">
-            {stats.byOS.map(({ os, _count }) => {
-              const percentage = (_count.os / maxOSCount) * 100
-
-              return (
-                <div key={os} className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-mono text-foreground truncate flex-1">
-                      {os.length > 20 ? `${os.slice(0, 20)}...` : os}
-                    </span>
-                    <span className="text-xs font-mono text-muted-foreground ml-2">
-                      {_count.os}
-                    </span>
-                  </div>
-                  <div className="h-1.5 bg-muted/50 rounded-sm overflow-hidden">
-                    <div
-                      className="h-full bg-primary/60 transition-all duration-500"
                       style={{ width: `${percentage}%` }}
                     />
                   </div>
