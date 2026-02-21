@@ -143,7 +143,7 @@ export default function ActivityPage() {
                 <p className="text-xs text-muted-foreground font-mono">LOADING_LOGS...</p>
               </div>
             </div>
-          ) : logs.length === 0 ? (
+          ) : !logs || logs.length === 0 ? (
             <div className="flex items-center justify-center py-12">
               <div className="flex flex-col items-center gap-3">
                 <div className="h-10 w-10 rounded-full border-2 border-dashed border-border/60 flex items-center justify-center">
