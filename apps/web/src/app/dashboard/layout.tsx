@@ -1,10 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import { useAuth } from '@/contexts/auth-context'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Shield, Server, Activity, LogOut, Cpu } from 'lucide-react'
+import { Shield, Server, Activity, LogOut, Cpu, Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
@@ -14,6 +15,7 @@ const navItems = [
 ]
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { user, logout } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
@@ -25,10 +27,44 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Mobile header */}
+      <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-card border-b border-border/40 flex items-center justify-between px-4 z-40">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setMobileMenuOpen(true)}
+            className="p-2 hover:bg-muted rounded-sm"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 bg-primary flex items-center justify-center">
+              <Shield className="w-4 h-4 text-primary-foreground" />
+            </div>
+            <span className="font-mono text-sm font-bold">INFRA<span className="text-primary">SCOPE</span></span>
+          </div>
+        </div>
+        <div className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
+          {user?.role}
+        </div>
+      </div>
+
+      {/* Mobile backdrop */}
+      {mobileMenuOpen && (
+        <div
+          className="md:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="fixed left-0 top-0 h-screen w-64 bg-card border-r border-border/40 flex flex-col">
+      <aside
+        className={cn(
+          "fixed left-0 top-0 h-screen w-64 bg-card border-r border-border/40 flex flex-col z-50 transition-transform duration-300",
+          mobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        )}
+      >
         {/* Brand */}
-        <div className="p-6 border-b border-border/40">
+        <div className="p-4 md:p-6 border-b border-border/40 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-primary flex items-center justify-center">
               <Shield className="w-5 h-5 text-primary-foreground" />
@@ -42,6 +78,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </p>
             </div>
           </div>
+          <button
+            onClick={() => setMobileMenuOpen(false)}
+            className="md:hidden p-1 hover:bg-muted rounded-sm"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         {/* System Status */}
@@ -110,8 +152,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* Main Content */}
-      <main className="ml-64">
-        <div className="p-8">
+      <main className="md:ml-64 pt-16 md:pt-0">
+        <div className="p-4 md:p-8">
           {children}
         </div>
       </main>

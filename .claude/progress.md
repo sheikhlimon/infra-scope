@@ -85,9 +85,9 @@
 
 ### Phase 8: Polish
 - [x] Search/filter/sort on systems list
-- [ ] Loading states throughout
-- [ ] Error handling + toasts
-- [ ] Responsive design
+- [x] Loading states throughout
+- [x] Error handling + toasts
+- [x] Responsive design
 
 ### Phase 9: Deploy
 - [ ] Set up Neon database
@@ -145,3 +145,4 @@
 - d6ee76b feat: add system detail page with technical industrial design
 - 1124351 feat: add activity log page with timeline design
 - f8b8407 feat: add search and filter to systems list
+- 62c5751 feat: add responsive design - mobile sidebar and card view

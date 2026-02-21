@@ -179,7 +179,7 @@ export default function SystemsPage() {
         </div>
 
         {/* Status bar */}
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
           <Card className="p-3 border-border/60 relative overflow-hidden bg-muted/20">
             <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-primary/40" />
             <div className="flex items-center justify-between">
@@ -225,7 +225,7 @@ export default function SystemsPage() {
 
       {/* Filters */}
       <Card className="p-4 border-border/60">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -244,7 +244,7 @@ export default function SystemsPage() {
               </button>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 scrollbar-hide">
             {(['ALL', 'ACTIVE', 'INACTIVE', 'SCANNING', 'ERROR'] as const).map(status => (
               <button
                 key={status}
@@ -278,8 +278,8 @@ export default function SystemsPage() {
         )}
       </Card>
 
-      {/* Systems table */}
-      <Card className="border-border/60 relative overflow-hidden">
+      {/* Systems table - desktop only */}
+      <Card className="border-border/60 relative overflow-hidden hidden md:block">
         {/* Corner accents */}
         <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-primary/30" />
         <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-primary/30" />
@@ -428,6 +428,134 @@ export default function SystemsPage() {
           </TableBody>
         </Table>
       </Card>
+
+      {/* Mobile card view */}
+      <div className="md:hidden space-y-3">
+        {loading ? (
+          <Card className="p-6 text-center">
+            <div className="flex flex-col items-center gap-3">
+              <div className="h-6 w-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+              <p className="text-xs text-muted-foreground font-mono">LOADING_SYSTEMS...</p>
+            </div>
+          </Card>
+        ) : safeSystems.length === 0 ? (
+          <Card className="p-6">
+            <div className="flex flex-col items-center gap-4 text-center">
+              <div className="h-12 w-12 rounded-full border-2 border-dashed border-border/60 flex items-center justify-center">
+                <Server className="h-5 w-5 text-muted-foreground/40" />
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground font-mono">NO_SYSTEMS_CONFIGURED</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => router.push('/dashboard/systems/new')}
+                  className="font-mono text-xs"
+                >
+                  <Plus className="mr-2 h-3 w-3" />
+                  ADD_FIRST_SYSTEM
+                </Button>
+              </div>
+            </div>
+          </Card>
+        ) : filteredSystems.length === 0 ? (
+          <Card className="p-6">
+            <div className="flex flex-col items-center gap-4 text-center">
+              <div className="h-12 w-12 rounded-full border-2 border-dashed border-border/60 flex items-center justify-center">
+                <Search className="h-5 w-5 text-muted-foreground/40" />
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground font-mono">NO_MATCHING_SYSTEMS</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearFilters}
+                  className="font-mono text-xs"
+                >
+                  <X className="mr-2 h-3 w-3" />
+                  CLEAR_FILTERS
+                </Button>
+              </div>
+            </div>
+          </Card>
+        ) : (
+          filteredSystems.map((system) => (
+            <Card key={system.id} className="p-4 border-border/60 relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-primary/30" />
+              <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-primary/30" />
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Server className="h-4 w-4 text-primary" />
+                  <div>
+                    <p className="text-sm font-mono font-bold">{system.hostname}</p>
+                    <p className="text-xs text-muted-foreground font-mono">{system.ipAddress}</p>
+                  </div>
+                </div>
+                <Badge
+                  variant="outline"
+                  className={`text-[10px] font-mono uppercase px-2 py-0.5 ${statusConfig[system.status].className}`}
+                >
+                  <span className={`h-1 w-1 rounded-full mr-1 ${statusConfig[system.status].dot}`} />
+                  {system.status}
+                </Badge>
+              </div>
+              <div className="space-y-2 text-xs text-muted-foreground mb-3">
+                <div className="flex justify-between">
+                  <span className="font-mono uppercase">OS:</span>
+                  <span className="text-foreground">{system.os}</span>
+                </div>
+                {system.cpuCores || system.memoryGB ? (
+                  <div className="flex justify-between">
+                    <span className="font-mono uppercase">Specs:</span>
+                    <span className="font-mono text-foreground">
+                      {system.cpuCores && `${system.cpuCores}C`}
+                      {system.cpuCores && system.memoryGB && ' / '}
+                      {system.memoryGB && `${system.memoryGB}GB`}
+                    </span>
+                  </div>
+                ) : null}
+                <div className="flex justify-between">
+                  <span className="font-mono uppercase">Last Scan:</span>
+                  <span className="text-foreground">
+                    {system.lastScannedAt
+                      ? new Date(system.lastScannedAt).toLocaleString()
+                      : 'Never'}
+                  </span>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => router.push(`/dashboard/systems/${system.id}`)}
+                  className="flex-1 font-mono text-xs"
+                >
+                  <Eye className="mr-2 h-3 w-3" />
+                  View
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleScan(system.id)}
+                  disabled={scanning === system.id}
+                  className="flex-1 font-mono text-xs"
+                >
+                  <RefreshCw className={`mr-2 h-3 w-3 ${scanning === system.id ? 'animate-spin' : ''}`} />
+                  Scan
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setDeleteId(system.id)}
+                  className="text-rose-400 border-rose-500/30 hover:bg-rose-500/10"
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              </div>
+            </Card>
+          ))
+        )}
+      </div>
 
       {/* Delete confirmation dialog */}
       <AlertDialog open={deleteId !== null} onOpenChange={() => setDeleteId(null)}>
