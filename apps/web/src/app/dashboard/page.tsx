@@ -38,6 +38,16 @@ interface System {
   lastScannedAt: string | null
 }
 
+interface PaginatedSystems {
+  systems: System[]
+  pagination: {
+    total: number
+    page: number
+    limit: number
+    totalPages: number
+  }
+}
+
 interface StatsData {
   total: number
   byStatus: StatusStats[]
@@ -67,10 +77,10 @@ function DashboardContent() {
       try {
         const [statsData, systemsData] = await Promise.all([
           api.get<StatsData>('/systems/stats'),
-          api.get<System[]>('/systems'),
+          api.get<PaginatedSystems>('/systems'),
         ])
         setStats(statsData)
-        setSystems(systemsData.slice(0, 5))
+        setSystems(systemsData.systems.slice(0, 5))
       } catch {
         toast({ title: 'Error', description: 'Failed to load dashboard data', variant: 'destructive' })
       } finally {
