@@ -83,27 +83,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </button>
         </div>
 
-        {/* System Status */}
-        <div className="p-4 border-b border-border/40 bg-muted/30">
-          <div className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-3">
-            System Status
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            <div className="bg-background rounded border border-border/60 p-2 text-center">
-              <div className="text-xs font-mono font-bold text-amber-500">3</div>
-              <div className="text-[9px] text-muted-foreground uppercase">Scanning</div>
-            </div>
-            <div className="bg-background rounded border border-border/60 p-2 text-center">
-              <div className="text-xs font-mono font-bold text-emerald-500">12</div>
-              <div className="text-[9px] text-muted-foreground uppercase">Active</div>
-            </div>
-            <div className="bg-background rounded border border-border/60 p-2 text-center">
-              <div className="text-xs font-mono font-bold text-rose-500">1</div>
-              <div className="text-[9px] text-muted-foreground uppercase">Error</div>
-            </div>
-          </div>
-        </div>
-
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-1">
           {navItems.map((item) => {
