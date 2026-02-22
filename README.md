@@ -1,4 +1,4 @@
-# Infra-Scope
+# InfraScope
 
 Infrastructure monitoring and management dashboard for Linux systems.
 
