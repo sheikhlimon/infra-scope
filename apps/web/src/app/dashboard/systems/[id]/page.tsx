@@ -186,16 +186,16 @@ export default function SystemDetailPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <Button
           variant="ghost"
           onClick={() => router.push('/dashboard/systems')}
-          className="font-mono text-xs hover:bg-primary/10"
+          className="font-mono text-xs hover:bg-primary/10 w-fit"
         >
           <ArrowLeft className="mr-2 h-3 w-3" />
           BACK_TO_SYSTEMS
         </Button>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button
             variant="outline"
             onClick={() => router.push(`/dashboard/systems/${system.id}/edit`)}
@@ -232,15 +232,15 @@ export default function SystemDetailPage() {
         <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-primary/40" />
         <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-primary/40" />
 
-        <div className="flex items-start justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6">
           <div className="space-y-4">
             <div className="flex items-center gap-4">
-              <div className={`h-16 w-16 rounded-lg border border-border/60 flex items-center justify-center bg-muted/20 ${config.glow}`}>
-                <Server className="h-8 w-8 text-primary" />
+              <div className={`h-12 sm:h-16 w-12 sm:w-16 rounded-lg border border-border/60 flex items-center justify-center bg-muted/20 ${config.glow}`}>
+                <Server className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
               </div>
               <div className="space-y-1">
-                <h1 className="text-2xl font-mono font-bold tracking-tight">{system.hostname}</h1>
-                <p className="text-sm text-muted-foreground font-mono">{system.ipAddress}</p>
+                <h1 className="text-xl sm:text-2xl font-mono font-bold tracking-tight">{system.hostname}</h1>
+                <p className="text-xs sm:text-sm text-muted-foreground font-mono">{system.ipAddress}</p>
               </div>
             </div>
             <Badge
@@ -252,17 +252,17 @@ export default function SystemDetailPage() {
             </Badge>
           </div>
 
-          <div className="text-right space-y-2">
+          <div className="text-left sm:text-right space-y-2">
             <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">
               System ID
             </p>
-            <p className="text-lg font-mono font-bold">#{system.id.toString().padStart(4, '0')}</p>
+            <p className="text-base sm:text-lg font-mono font-bold">#{system.id.toString().padStart(4, '0')}</p>
           </div>
         </div>
       </Card>
 
       {/* Details grid */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* System Info */}
         <Card className="p-6 border-border/60 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-primary/40" />
