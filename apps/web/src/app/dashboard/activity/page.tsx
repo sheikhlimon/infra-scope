@@ -174,12 +174,12 @@ export default function ActivityPage() {
                 return (
                   <div
                     key={log.id}
-                    className={`group flex gap-4 py-3 ${
+                    className={`group flex gap-3 sm:gap-4 py-3 ${
                       index !== logs.length - 1 ? 'border-b border-border/40' : ''
                     } hover:bg-muted/5 transition-colors`}
                   >
-                    {/* Timestamp column */}
-                    <div className="flex-shrink-0 w-32 text-right">
+                    {/* Timestamp column - hidden on mobile */}
+                    <div className="hidden sm:flex flex-shrink-0 w-32 text-right">
                       <div className="space-y-0.5">
                         <p className="text-[10px] text-muted-foreground font-mono">{dateStr}</p>
                         <p className="text-xs font-mono">{timeStr}</p>
@@ -202,7 +202,7 @@ export default function ActivityPage() {
 
                     {/* Action details */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start justify-between gap-2 sm:gap-4">
                         <div className="space-y-1 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <Badge
@@ -222,6 +222,10 @@ export default function ActivityPage() {
                               System: <span className="text-foreground">{log.system.hostname}</span>
                             </p>
                           )}
+                          {/* Mobile timestamp - shown below action */}
+                          <p className="sm:hidden text-[10px] text-muted-foreground font-mono">
+                            {dateStr} {timeStr}
+                          </p>
                         </div>
                         <span className="text-[10px] text-muted-foreground font-mono">
                           #{log.id.toString().padStart(4, '0')}
