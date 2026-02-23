@@ -9,12 +9,10 @@ import { Badge } from '@/components/ui/badge'
 import {
   FileText,
   UserPlus,
-  UserMinus,
   Server,
   RefreshCw,
   Trash2,
   Edit,
-  Shield,
   Key,
 } from 'lucide-react'
 

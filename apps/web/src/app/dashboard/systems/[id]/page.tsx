@@ -25,8 +25,6 @@ import {
   Edit,
   Activity,
   Cpu,
-  HardDrive,
-  Calendar,
   Network,
 } from 'lucide-react'
 

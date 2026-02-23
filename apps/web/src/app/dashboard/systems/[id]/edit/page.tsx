@@ -37,7 +37,6 @@ export default function EditSystemPage() {
   const params = useParams()
   const router = useRouter()
   const { toast } = useToast()
-  const [system, setSystem] = useState<System | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
@@ -51,7 +50,6 @@ export default function EditSystemPage() {
     async function fetchSystem() {
       try {
         const data = await api.get<System>(`/systems/${params.id}`)
-        setSystem(data)
         setHostname(data.hostname)
         setIpAddress(data.ipAddress)
         setOs(data.os)

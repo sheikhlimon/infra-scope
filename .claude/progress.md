@@ -28,16 +28,18 @@
 ## Implementation Order (From Scratch, One File At A Time)
 
 ### Phase 1: Setup
+
 - [x] Root package.json + turbo.json
 - [x] .gitignore + .prettierrc
 - [x] packages/config/eslint + packages/config/tsconfig
 - [x] apps/server structure + package.json
 - [x] apps/web structure + package.json
 - [x] Husky + lint-staged setup
-- [x] apps/web Tailwind + shadcn/ui setup (components/ui/*, lib/utils.ts)
+- [x] apps/web Tailwind + shadcn/ui setup (components/ui/\*, lib/utils.ts)
 - [x] packages/db (Prisma schema)
 
 ### Phase 2: Backend - Auth
+
 - [x] `packages/db/src/prisma.ts` - Prisma client singleton
 - [x] `apps/server/src/utils/password.ts` - bcrypt helpers
 - [x] `apps/server/src/utils/jwt.ts` - JWT sign/verify
@@ -49,6 +51,7 @@
 - [x] `apps/server/src/app.ts` - Express app setup
 
 ### Phase 3: Backend - Systems
+
 - [x] `apps/server/src/schemas/system.schema.ts` - Zod validation
 - [x] `apps/server/src/services/system.service.ts` - CRUD logic
 - [x] `apps/server/src/middleware/role.middleware.ts` - Permission checks
@@ -57,10 +60,12 @@
 - [x] Add scan simulation
 
 ### Phase 4: Backend - Activity
+
 - [x] `apps/server/src/services/activity.service.ts` - Logging logic
 - [x] Integrate into existing services
 
 ### Phase 5: Frontend - Setup
+
 - [x] Add shadcn components: Button, Card, Input, Label, Badge, Table, Dialog, Toast
 - [x] Create fetch API wrapper (lib/api.ts)
 - [x] Set up auth context (contexts/auth-context.tsx)
@@ -68,10 +73,12 @@
 - [x] Root layout with AuthProvider + Toaster
 
 ### Phase 6: Frontend - Auth
+
 - [x] apps/web/app/(auth)/login/page.tsx
 - [x] apps/web/app/(auth)/register/page.tsx
 
 ### Phase 7: Frontend - Dashboard
+
 - [x] apps/web/app/dashboard/layout.tsx (with nav)
 - [x] apps/web/app/dashboard/page.tsx
 - [x] apps/web/app/dashboard/systems/page.tsx
@@ -80,37 +87,62 @@
 - [x] apps/web/app/dashboard/activity/page.tsx
 
 ### Phase 8: Polish
+
 - [x] Search/filter/sort on systems list
 - [x] Loading states throughout
 - [x] Error handling + toasts
 - [x] Responsive design
 
 ### Phase 8.5: Enhanced Features
+
 - [x] Analytics/Stats dashboard (charts, summaries)
 - [x] Pagination on systems list
 - [ ] Advanced form validation UI
 
 ### Phase 8.75: Landing & Auth Flow
+
 - [x] Marketing landing page
 - [x] Login/Register redirect to dashboard
 - [x] Consistent logo across all pages (component + favicon)
 
 ### Phase 9: Deploy
-- [ ] Set up Neon database
-- [ ] Deploy backend to Render
-- [ ] Deploy frontend to Vercel
+
+- [x] Set up Neon database
+- [x] Deploy backend to Render
+- [x] Deploy frontend to Vercel
+
+### Phase 10: Next.js 16 Upgrade (2025-02-24)
+
+- [x] Upgrade Next.js 15.1.0 → 16.1.6
+- [x] Migrate ESLint to flat config (eslint.config.mjs)
+- [x] Fix lint errors
+- [x] Turbo monorepo lint passes
+
+**Files changed**:
+
+- apps/web/eslint.config.mjs (new flat config)
+- apps/web/package.json (lint script, deps)
+- apps/web/src/\*/unused imports cleanup
+
+**Key changes**:
+
+- `next lint` → `eslint .` (flat config incompatibility)
+- Added `@next/eslint-plugin-next`, `@typescript-eslint/parser`
+- Removed `eslint-config-next`, `@eslint/eslintrc`
 
 ---
 
 ## MERN Requirements Checklist
 
 ### Mandatory (Need All)
+
 - [x] Authentication
 - [x] CRUD (Systems: Create, Read, Update, Delete)
 - [x] Dashboard (User view with summary/stats)
 - [x] Responsive UI (Tailwind CSS + shadcn/ui)
 
 ### Features (Pick 5+)
+
 - [x] Role-Based Access (Admin/User permissions)
 - [x] Search, Filter & Sort
 - [x] Activity & Notification System
