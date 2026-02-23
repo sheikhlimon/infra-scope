@@ -12,6 +12,7 @@
     "build": "turbo build",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
+    "check": "turbo lint typecheck",
     "db:push": "turbo -F @infra-scope/db db:push",
     "db:studio": "turbo -F @infra-scope/db db:studio",
     "db:generate": "turbo -F @infra-scope/db db:generate",
