@@ -132,7 +132,7 @@ function DashboardContent() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((stat, i) => {
           const Icon = stat.icon
           return (
@@ -159,8 +159,8 @@ function DashboardContent() {
         })}
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
-        <Card className="col-span-2 p-6 border-border/60">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-2 p-6 border-border/60">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-sm font-mono font-bold uppercase tracking-wider text-foreground">
               Recent Systems
