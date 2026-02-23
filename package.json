@@ -17,7 +17,7 @@
     "db:studio": "turbo -F @infra-scope/db db:studio",
     "db:generate": "turbo -F @infra-scope/db db:generate",
     "db:migrate": "turbo -F @infra-scope/db db:migrate",
-    "prepare": "husky install || true"
+    "prepare": "husky || true"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
