@@ -111,7 +111,14 @@
 - [x] Deploy backend to Render
 - [x] Deploy frontend to Vercel
 
-### Phase 10: Next.js 16 Upgrade (2025-02-24)
+### Phase 11: Tooling Updates
+- [x] Add .nvmrc with Node v24
+- [x] Update turbo to 2.8.10
+- [x] Add turbo TUI and global env/config
+- [x] Add `npm run check` command
+- [x] Fix husky deprecation (prepare: husky || true)
+
+### Phase 10: Next.js 16 Upgrade
 
 - [x] Upgrade Next.js 15.1.0 → 16.1.6
 - [x] Migrate ESLint to flat config (eslint.config.mjs)
@@ -185,3 +192,13 @@
 - f8b8407 feat: add search and filter to systems list
 - 62c5751 feat: add responsive design - mobile sidebar and card view
 - 43e39f4 fix: build errors - add 'use client' where needed and fix suspense boundary
+- 5895ee7 fix: add db build step compile to dist
+- 44b37d0 fix: move @types to dependencies for Render CI
+- b5f561d fix: add viewport meta and mobile responsive landing page
+- 6a1f06b fix: dashboard page mobile responsive grids
+- 7f3e810 fix: activity page mobile responsive timeline
+- 7ef6b0d fix: system detail page mobile responsive
+- 1234134 fix: use separate viewport export for Next.js 15
+- 8f997e0 feat: upgrade to Next.js 16 and migrate to ESLint flat config
+- 5de805f chore: update turborepo config and add check command
+- f9f52f0 chore: add .nvmrc v24 and make prepare fail gracefully
