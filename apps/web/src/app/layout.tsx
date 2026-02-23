@@ -14,6 +14,7 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "InfraScope",
   description: "Infrastructure monitoring dashboard",
+  viewport: "width=device-width, initial-scale=1",
   icons: {
     icon: "/icon.svg",
   },
