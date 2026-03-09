@@ -16,7 +16,7 @@ app.use("/api/systems", systemRoutes);
 app.use("/api/activity", activityRoutes);
 
 app.get("/health", (_req, res) => {
-  res.json({ status: "ok" });
+  res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
 app.listen(PORT, () => {

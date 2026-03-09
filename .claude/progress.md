@@ -21,7 +21,111 @@
 
 ## Current Task
 
-**NEXT**: Phase 9 - Deploy (Neon DB, Render backend, Vercel frontend)
+**NEXT**: Phase 12 - Server-Side Filtering + Component Extraction (DRY)
+
+---
+
+## Phase 12: Server-Side Filter + Extract Components
+
+### Issues to Fix
+
+**BUG 1: Client filter + Server pagination = broken**
+- Filter searches only current page (10 items)
+- Stats count from page data, not total
+- Need: Server-side filtering
+
+**BUG 2: DRY violations**
+- statusConfig duplicated in 2 files
+- Loading states repeated
+- Same patterns across pages
+
+**BUG 3: 693-line systems page**
+- Mixed concerns: fetching, filtering, rendering
+- Needs extraction
+
+---
+
+## Phase 12A: Backend - Add Server Filtering
+
+**File: `apps/server/src/services/system.service.ts`**
+
+**Changes:**
+```typescript
+// Before: getSystems(userId, userRole, page, limit)
+// After:  getSystems(userId, userRole, page, limit, search?, status?, sortBy?)
+
+// WHERE clause adds:
+// - search: hostname ILIKE %search% OR ipAddress ILIKE %search%
+// - status: exact match if provided
+// - sortBy: orderBy field
+```
+
+---
+
+## Phase 12B: Backend - Pass Filter Params
+
+**Files:**
+- `apps/server/src/controllers/system.controller.ts` - Extract params from query
+- Already routes to `/systems` - no changes needed
+
+---
+
+## Phase 12C: Frontend - Use Server Filter
+
+**File: `apps/web/src/app/dashboard/systems/page.tsx`**
+
+**Changes:**
+- Remove client-side filtering (lines 164-171)
+- Pass search/status to API query
+- Use `/systems/stats` for accurate counts
+- Keep pagination as-is
+
+---
+
+## Phase 12D: Extract Shared Utilities
+
+**New files:**
+- [ ] `lib/constants/system-status.ts` - Shared statusConfig
+- [ ] `components/systems/status-badge.tsx` - Reusable badge
+- [ ] `components/systems/system-actions.tsx` - Scan/Delete buttons
+- [ ] `components/shared/loading-skeleton.tsx` - Skeleton loader
+
+---
+
+## Phase 12E: Extract Systems Components
+
+**From: `systems/page.tsx` (693 → ~150 lines)**
+
+- [ ] `hooks/use-systems.ts` - Fetching with filter params
+- [ ] `components/systems/systems-table.tsx` - Desktop table
+- [ ] `components/systems/systems-mobile-cards.tsx` - Mobile view
+- [ ] `components/systems/systems-filters.tsx` - Search/filter UI
+- [ ] `components/systems/systems-stats-bar.tsx` - Summary cards
+
+---
+
+## Phase 12F: Add Loading/Error Boundaries
+
+- [ ] `apps/web/app/dashboard/systems/loading.tsx`
+- [ ] `apps/web/app/dashboard/systems/error.tsx`
+
+---
+
+## Phase 12G: Extract Other Pages (DRY)
+
+- [ ] `systems/[id]/page.tsx` - extract, reuse statusConfig
+- [ ] `dashboard/page.tsx` - extract components
+- [ ] `activity/page.tsx` - extract components
+- [ ] `new + edit pages` - shared SystemForm
+
+---
+
+## Phase 13: Test + Commit
+
+- [ ] Filter works with pagination
+- [ ] Stats show correct totals
+- [ ] All routes work
+- [ ] Lint + typecheck pass
 
 ---
 
@@ -111,19 +215,20 @@
 - [x] Deploy backend to Render
 - [x] Deploy frontend to Vercel
 
-### Phase 11: Tooling Updates
-- [x] Add .nvmrc with Node v24
-- [x] Update turbo to 2.8.10
-- [x] Add turbo TUI and global env/config
-- [x] Add `npm run check` command
-- [x] Fix husky deprecation (prepare: husky || true)
-
 ### Phase 10: Next.js 16 Upgrade
 
 - [x] Upgrade Next.js 15.1.0 → 16.1.6
 - [x] Migrate ESLint to flat config (eslint.config.mjs)
 - [x] Fix lint errors
 - [x] Turbo monorepo lint passes
+
+### Phase 11: Tooling Updates
+
+- [x] Add .nvmrc with Node v24
+- [x] Update turbo to 2.8.10
+- [x] Add turbo TUI and global env/config
+- [x] Add `npm run check` command
+- [x] Fix husky deprecation (prepare: husky || true)
 
 **Files changed**:
 

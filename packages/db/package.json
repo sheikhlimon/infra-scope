@@ -14,14 +14,17 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
+    "db:seed": "tsx scripts/admin-check.ts",
     "build": "prisma generate && tsc"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "bcrypt": "^5.1.1",
     "prisma": "^5.22.0",
     "typescript": "^5"
   },
   "devDependencies": {
-    "@infra-scope/config": "*"
+    "@infra-scope/config": "*",
+    "tsx": "^4.19.0"
   }
 }

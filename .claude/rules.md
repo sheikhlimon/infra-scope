@@ -13,6 +13,8 @@
 6. **UPDATE PROGRESS AFTER ACTION** - Mark what's done, what's next
 7. **ANSWER QUESTIONS** - Pause and explain when user asks
 8. **TEACH MISTAKES** - Explain common pitfalls for each concept
+9. **DRY PRINCIPLE** - Don't repeat yourself. Extract shared logic/constants/components
+10. **FILE SIZE LIMITS** - Page files ~150 lines max, components ~200 lines. Extract when bloated
 
 ## Comment Rules (IMPORTANT)
 - **NO comments on self-explanatory code** - If code speaks for itself, no comment needed
@@ -76,3 +78,47 @@ When building frontend components:
 ✅ Asymmetric layouts, mixed border radii, dark mode, micro-interactions, skeleton loaders, data density
 
 See plan file for full UI Style Rules section.
+
+## Code Organization Rules
+
+### File Size Limits
+- **Page files**: ~150 lines max (exclude imports/types)
+- **Component files**: ~200 lines max
+- **Hook files**: ~150 lines max
+- **Service files**: ~200 lines max
+
+**When limits exceeded:**
+- Extract reusable components
+- Create custom hooks for logic
+- Move constants to separate files
+- Split complex functions
+
+### Component Extraction Guidelines
+
+**Extract when:**
+- Same UI appears 2+ times (StatusBadge, system cards)
+- Same logic appears 2+ times (filter, pagination, actions)
+- File exceeds size limits
+- Mix of concerns (fetching + rendering + state)
+
+**File structure:**
+```
+components/
+  systems/
+    status-badge.tsx      # Reusable status display
+    system-actions.tsx    # Scan/Delete buttons
+    systems-table.tsx     # Desktop table view
+  shared/
+    loading-skeleton.tsx  # Skeleton loaders
+  hooks/
+    use-systems.ts        # Systems fetching + pagination
+lib/
+  constants/
+    system-status.ts      # Shared status config
+```
+
+### DRY Violations to Watch
+- Duplicate statusConfig (exists in 2 files)
+- Duplicate filter logic
+- Same loading/empty states repeated
+- Same API call patterns

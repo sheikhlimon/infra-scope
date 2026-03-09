@@ -33,6 +33,9 @@
     "db:studio": {
       "cache": false,
       "persistent": true
+    },
+    "db:seed": {
+      "cache": false
     }
   }
 }
