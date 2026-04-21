@@ -5,11 +5,12 @@ import { useRouter } from 'next/navigation'
 import { api } from '@/lib/api'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/contexts/auth-context'
+import { useServerWarmup } from '@/hooks/use-server-warmup'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card } from '@/components/ui/card'
-import { UserPlus, Eye, EyeOff } from 'lucide-react'
+import { UserPlus, Eye, EyeOff, Clock, Loader2, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
 import { Logo } from '@/components/logo'
 
@@ -20,6 +21,7 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const { status: serverStatus, attempt: retryAttempt, totalAttempts, retry: retryWarmup } = useServerWarmup()
   const router = useRouter()
   const { toast } = useToast()
   const { login } = useAuth()
@@ -116,6 +118,45 @@ export default function RegisterPage() {
               </div>
             </div>
 
+            {/* Server status indicator */}
+            <div className="mb-6 p-3 bg-muted/30 border border-border/40 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {(serverStatus === 'checking' || serverStatus === 'warming') && (
+                  <>
+                    <Loader2 className="h-4 w-4 text-yellow-500 animate-spin" />
+                    <span className="font-mono text-xs text-yellow-500">
+                      WARMING_SERVER {retryAttempt > 0 && `(${retryAttempt}/${totalAttempts})`}
+                    </span>
+                  </>
+                )}
+                {serverStatus === 'ready' && (
+                  <>
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span className="font-mono text-xs text-green-500">SERVER_READY</span>
+                  </>
+                )}
+                {serverStatus === 'error' && (
+                  <>
+                    <Clock className="h-4 w-4 text-red-500" />
+                    <span className="font-mono text-xs text-red-500">SERVER_TIMEOUT</span>
+                  </>
+                )}
+              </div>
+              {(serverStatus === 'checking' || serverStatus === 'warming') && (
+                <span className="font-mono text-[10px] text-muted-foreground">~50s max</span>
+              )}
+              {serverStatus === 'error' && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={retryWarmup}
+                  className="font-mono text-[10px] text-red-500 h-auto p-0 hover:text-red-400"
+                >
+                  RETRY
+                </Button>
+              )}
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name" className="font-mono text-xs uppercase tracking-wider">
@@ -193,7 +234,7 @@ export default function RegisterPage() {
               <Button
                 type="submit"
                 className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-mono text-xs uppercase tracking-wider rounded-sm mt-4"
-                disabled={loading}
+                disabled={loading || serverStatus === 'warming' || serverStatus === 'checking'}
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">

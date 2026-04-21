@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { useToast } from '@/hooks/use-toast'
+import { useServerWarmup } from '@/hooks/use-server-warmup'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -18,8 +19,6 @@ const DEMO_CREDENTIALS = {
   password: 'admin123',
 }
 
-const HEALTH_MAX_RETRIES = 10 // ~50 seconds of retries
-const HEALTH_RETRY_DELAY = 5000 // 5 seconds between retries
 const LOGIN_MAX_RETRIES = 2
 const LOGIN_RETRY_DELAY = 3000
 
@@ -28,8 +27,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  const [serverStatus, setServerStatus] = useState<'warming' | 'ready' | 'error'>('warming')
-  const [retryAttempt, setRetryAttempt] = useState(0)
+  const { status: serverStatus, attempt: retryAttempt, totalAttempts, retry: retryWarmup } = useServerWarmup()
   const { login } = useAuth()
   const router = useRouter()
   const { toast } = useToast()
@@ -38,35 +36,6 @@ export default function LoginPage() {
     setEmail(DEMO_CREDENTIALS.email)
     setPassword(DEMO_CREDENTIALS.password)
   }
-
-  // Ping health endpoint on page load to warm up the server
-  const checkHealth = useCallback(async (attempt: number = 1) => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'
-    const healthUrl = apiUrl.replace('/api', '/health')
-
-    try {
-      const res = await fetch(healthUrl, { method: 'GET' })
-      if (res.ok) {
-        setServerStatus('ready')
-        return true
-      }
-    } catch {
-      // Server not ready yet
-    }
-
-    if (attempt < HEALTH_MAX_RETRIES) {
-      setRetryAttempt(attempt)
-      await new Promise(resolve => setTimeout(resolve, HEALTH_RETRY_DELAY))
-      return checkHealth(attempt + 1)
-    }
-
-    setServerStatus('error')
-    return false
-  }, [])
-
-  useEffect(() => {
-    checkHealth()
-  }, [checkHealth])
 
   // Login with retry
   const handleLogin = async (attempt: number = 1): Promise<boolean> => {
@@ -168,11 +137,11 @@ export default function LoginPage() {
             {/* Server status indicator */}
             <div className="mb-6 p-3 bg-muted/30 border border-border/40 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                {serverStatus === 'warming' && (
+                {(serverStatus === 'checking' || serverStatus === 'warming') && (
                   <>
                     <Loader2 className="h-4 w-4 text-yellow-500 animate-spin" />
                     <span className="font-mono text-xs text-yellow-500">
-                      WARMING_SERVER {retryAttempt > 0 && `(${retryAttempt}/${HEALTH_MAX_RETRIES})`}
+                      WARMING_SERVER {retryAttempt > 0 && `(${retryAttempt}/${totalAttempts})`}
                     </span>
                   </>
                 )}
@@ -189,8 +158,18 @@ export default function LoginPage() {
                   </>
                 )}
               </div>
-              {serverStatus === 'warming' && (
+              {(serverStatus === 'checking' || serverStatus === 'warming') && (
                 <span className="font-mono text-[10px] text-muted-foreground">~50s max</span>
+              )}
+              {serverStatus === 'error' && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={retryWarmup}
+                  className="font-mono text-[10px] text-red-500 h-auto p-0 hover:text-red-400"
+                >
+                  RETRY
+                </Button>
               )}
             </div>
 
@@ -239,7 +218,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-mono text-xs uppercase tracking-wider rounded-sm"
-                disabled={loading || serverStatus === 'warming'}
+                disabled={loading || serverStatus === 'warming' || serverStatus === 'checking'}
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -292,7 +271,7 @@ export default function LoginPage() {
                 variant="outline"
                 size="sm"
                 onClick={fillDemoCredentials}
-                disabled={loading || serverStatus === 'warming'}
+                disabled={loading || serverStatus === 'warming' || serverStatus === 'checking'}
                 className="w-full mt-3 font-mono text-xs uppercase tracking-wider border-border/60 hover:bg-muted/50"
               >
                 Auto_Fill
