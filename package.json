@@ -22,8 +22,10 @@
     "prepare": "husky || true"
   },
   "lint-staged": {
-    "*.{ts,tsx}": [
-      "eslint --fix",
+    "apps/**/*.{ts,tsx}": [
+      "prettier --write"
+    ],
+    "packages/**/*.{ts,tsx}": [
       "prettier --write"
     ]
   },
