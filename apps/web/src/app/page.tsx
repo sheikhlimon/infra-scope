@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Logo } from '@/components/logo'
@@ -89,6 +90,35 @@ export default function LandingPage() {
           </div>
         </div>
 
+        <div className="mb-16 sm:mb-24 max-w-5xl mx-auto">
+          <div className="relative border border-border/40 rounded-sm overflow-hidden">
+            <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-primary/40 z-10" />
+            <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-primary/40 z-10" />
+            <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-primary/40 z-10" />
+            <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-primary/40 z-10" />
+
+            <div className="bg-muted/20 p-2 sm:p-3">
+              <div className="flex items-center gap-2 px-2 pb-2">
+                <div className="w-2 h-2 rounded-full bg-rose-500" />
+                <div className="w-2 h-2 rounded-full bg-amber-500" />
+                <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span className="ml-2 text-[10px] font-mono text-muted-foreground/60">admin-dashboard</span>
+              </div>
+              <Image
+                src="/admin.png"
+                alt="InfraScope Admin Dashboard"
+                width={1200}
+                height={600}
+                className="w-full h-auto rounded-sm"
+                priority
+              />
+            </div>
+          </div>
+          <p className="text-center mt-4 text-xs font-mono text-muted-foreground">
+            Admin Dashboard — System monitoring in real-time
+          </p>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {FEATURES.map((feature, i) => {
             const Icon = feature.icon
@@ -131,7 +161,7 @@ export default function LandingPage() {
         </div>
       </main>
 
-      <footer className="border-t border-border/40 mt-16 sm:mt-24">
+      <footer className="border-t border-border/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
@@ -139,7 +169,16 @@ export default function LandingPage() {
               <span className="text-xs font-mono text-muted-foreground">INFRA-SCOPE</span>
             </div>
             <p className="text-[10px] sm:text-xs text-muted-foreground font-mono text-center sm:text-right">
-              Built with Next.js 15 + Express + Prisma
+              Built by{' '}
+              <a
+                href="https://github.com/sheikhlimon"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
+                Sheikh Limon
+              </a>{' '}
+              with Next.js 16 + Express + Prisma
             </p>
           </div>
         </div>
