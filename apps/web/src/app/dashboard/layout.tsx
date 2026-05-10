@@ -66,7 +66,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       >
         {/* Brand */}
         <div className="p-4 md:p-6 border-b border-border/40 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3">
             <div className="w-7 h-7 border-2 border-primary flex items-center justify-center">
               <div className="w-2.5 h-2.5 bg-primary" />
             </div>
@@ -75,7 +75,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 INFRA-SCOPE
               </h1>
             </div>
-          </div>
+          </Link>
           <button
             onClick={() => setMobileMenuOpen(false)}
             className="md:hidden p-1 hover:bg-muted rounded-sm"
