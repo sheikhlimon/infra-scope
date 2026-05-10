@@ -48,11 +48,18 @@ async function request<T>(
   let res: Response
 
   try {
-    res = await fetch(`${API_URL}${endpoint}`, {
-      method,
-      headers,
-      body: body ? JSON.stringify(body) : undefined,
-    })
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 8000)
+    try {
+      res = await fetch(`${API_URL}${endpoint}`, {
+        method,
+        headers,
+        body: body ? JSON.stringify(body) : undefined,
+        signal: controller.signal,
+      })
+    } finally {
+      clearTimeout(timeout)
+    }
   } catch {
     // Network error — server is likely sleeping
     const { dismiss } = toast({

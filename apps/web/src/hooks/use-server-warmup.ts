@@ -11,16 +11,15 @@ export type WarmupStatus = 'checking' | 'warming' | 'ready' | 'error'
 export function useServerWarmup() {
   const [status, setStatus] = useState<WarmupStatus>('checking')
   const [attempt, setAttempt] = useState(0)
-  const abortRef = useRef<AbortController | null>(null)
+  const cancelledRef = useRef(false)
 
-  const checkHealth = useCallback(async (retry = 1) => {
+  const checkHealth = useCallback(async (retry = 0) => {
+    if (cancelledRef.current) return false
+
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'
     const healthUrl = apiUrl.replace('/api', '/health')
 
-    // Abort previous in-flight request if still pending
-    abortRef.current?.abort()
     const controller = new AbortController()
-    abortRef.current = controller
     const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT)
 
     try {
@@ -35,9 +34,11 @@ export function useServerWarmup() {
       clearTimeout(timeout)
     }
 
-    if (retry < MAX_RETRIES) {
+    if (cancelledRef.current) return false
+
+    if (retry + 1 < MAX_RETRIES) {
       setStatus('warming')
-      setAttempt(retry)
+      setAttempt(retry + 1)
       await new Promise(resolve => setTimeout(resolve, RETRY_DELAY))
       return checkHealth(retry + 1)
     }
@@ -47,14 +48,16 @@ export function useServerWarmup() {
   }, [])
 
   const retry = useCallback(() => {
+    cancelledRef.current = false
     setStatus('checking')
     setAttempt(0)
-    return checkHealth(1)
+    return checkHealth(0)
   }, [checkHealth])
 
   useEffect(() => {
-    checkHealth()
-    return () => abortRef.current?.abort()
+    cancelledRef.current = false
+    checkHealth(0)
+    return () => { cancelledRef.current = true }
   }, [checkHealth])
 
   return { status, attempt, totalAttempts: MAX_RETRIES, retry }
