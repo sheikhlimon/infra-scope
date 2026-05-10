@@ -1,62 +1,62 @@
-import { toast } from '@/hooks/use-toast'
+import { toast } from "@/hooks/use-toast";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
 
-type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
+type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 
 async function waitForServer(attempt = 1): Promise<boolean> {
-  const pingUrl = API_URL.replace('/api', '/ping')
+  const pingUrl = `${API_URL}/ping`;
 
   try {
-    const res = await fetch(pingUrl, { method: 'GET' })
-    if (res.ok) return true
+    const res = await fetch(pingUrl, { method: "GET" });
+    if (res.ok) return true;
   } catch {
     // Server not ready yet
   }
 
   if (attempt < 10) {
-    await new Promise(resolve => setTimeout(resolve, 5000))
-    return waitForServer(attempt + 1)
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+    return waitForServer(attempt + 1);
   }
 
-  return false
+  return false;
 }
 
 async function request<T>(
   endpoint: string,
-  method: HttpMethod = 'GET',
+  method: HttpMethod = "GET",
   body?: unknown
 ): Promise<T> {
-  const token = localStorage.getItem('token')
+  const token = localStorage.getItem("token");
 
   const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-  }
+    "Content-Type": "application/json",
+  };
 
   if (token) {
-    headers.Authorization = `Bearer ${token}`
+    headers.Authorization = `Bearer ${token}`;
   }
 
-  let res: Response
+  let res: Response;
 
   try {
     res = await fetch(`${API_URL}${endpoint}`, {
       method,
       headers,
       body: body ? JSON.stringify(body) : undefined,
-    })
+    });
   } catch {
     // Network error — server is likely sleeping
     const { dismiss } = toast({
-      title: 'SERVER_WAKEUP',
-      description: 'Server is waking up, please wait...',
-    })
+      title: "SERVER_WAKEUP",
+      description: "Server is waking up, please wait...",
+    });
 
-    const awake = await waitForServer()
-    dismiss()
+    const awake = await waitForServer();
+    dismiss();
 
     if (!awake) {
-      throw new Error('Server is still waking up. Please try again in a moment.')
+      throw new Error("Server is still waking up. Please try again in a moment.");
     }
 
     // Replay the original request
@@ -64,35 +64,35 @@ async function request<T>(
       method,
       headers,
       body: body ? JSON.stringify(body) : undefined,
-    })
+    });
 
     if (!retryRes.ok) {
       if (retryRes.status === 401) {
-        localStorage.removeItem('token')
-        window.location.href = '/login'
+        localStorage.removeItem("token");
+        window.location.href = "/login";
       }
-      const err = await retryRes.json()
-      throw new Error(err.error || 'Request failed')
+      const err = await retryRes.json();
+      throw new Error(err.error || "Request failed");
     }
 
-    return retryRes.json()
+    return retryRes.json();
   }
 
   if (!res.ok) {
     if (res.status === 401) {
-      localStorage.removeItem('token')
-      window.location.href = '/login'
+      localStorage.removeItem("token");
+      window.location.href = "/login";
     }
-    const err = await res.json()
-    throw new Error(err.error || 'Request failed')
+    const err = await res.json();
+    throw new Error(err.error || "Request failed");
   }
 
-  return res.json()
+  return res.json();
 }
 
 export const api = {
-  get: <T>(url: string) => request<T>(url, 'GET'),
-  post: <T>(url: string, body: unknown) => request<T>(url, 'POST', body),
-  put: <T>(url: string, body: unknown) => request<T>(url, 'PUT', body),
-  delete: <T>(url: string) => request<T>(url, 'DELETE'),
-}
+  get: <T>(url: string) => request<T>(url, "GET"),
+  post: <T>(url: string, body: unknown) => request<T>(url, "POST", body),
+  put: <T>(url: string, body: unknown) => request<T>(url, "PUT", body),
+  delete: <T>(url: string) => request<T>(url, "DELETE"),
+};
