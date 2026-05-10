@@ -116,6 +116,7 @@ export async function scanSystem(id: number, userId: number, userRole: string) {
 
   // Set status to scanning
   await prisma.system.update({ where: { id }, data: { status: "SCANNING" } });
+  infraEvents.emitEvent("system.status_changed", { systemId: id, status: "SCANNING", hostname: system.hostname });
 
   // Simulate scan delay (3 seconds)
   await new Promise(resolve => {
