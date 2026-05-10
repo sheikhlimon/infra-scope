@@ -1,65 +1,83 @@
 # InfraScope
 
-Infrastructure monitoring and management dashboard for Linux systems.
+Full-stack infrastructure monitoring and management dashboard built from scratch.
 
-## Project Idea
+## What Is This?
 
-A web-based platform to track and manage Linux infrastructure records. Instead of SSHing into servers individually, administrators can view system status, trigger simulated scans, and maintain an audit log—all from one dashboard.
+InfraScope is a web-based platform where system administrators can view server status, manage infrastructure records, and maintain an audit log — all from a single interface. Instead of SSHing into multiple servers individually, admins can track everything from one centralized dashboard.
 
-**Note:** This is a learning project with simulated scanning. No real SSH connections are made.
+**Note:** Scanning is simulated. No real SSH connections are made.
 
-## Implemented Features
 
-- **Authentication**: User registration, JWT-based login
-- **Role-Based Access**: Admin (sees all systems) vs User (sees own systems)
-- **System CRUD**: Create, read, update, delete infrastructure records
-- **Dashboard**: Real-time stats, recent systems, activity timeline
-- **Status Management**: Active, Inactive, Scanning, Error states
-- **Activity Logging**: Complete audit trail of all actions
-- **Search & Filter**: Find systems by hostname, status, OS
-- **Responsive Design**: Mobile-friendly with card/table views
-- **404 Page**: Industrial-styled error page
-- **Edit System**: Update system information
+## Architecture
+
+```
+┌─────────────┐     HTTP/REST     ┌───────────────┐     Prisma      ┌──────────────┐
+│             │ ────────────────► │               │ ──────────────► │              │
+│  Next.js 16 │                   │  Express.js   │                 │  PostgreSQL  │
+│  Frontend   │ ◄──────────────── │   Backend     │ ◄────────────── │   (Neon)     │
+│             │    JSON Response  │               │     Queries     │              │
+└─────────────┘                   └───────────────┘                 └──────────────┘
+                                         │
+                                    SSE Push ──► Real-time updates to all connected clients
+```
+
+
+## Key Features
+
+- **Authentication** — User registration and JWT-based login
+- **Role-Based Access** — Admin sees all systems, User sees only their own
+- **System CRUD** — Create, view, edit, delete infrastructure records
+- **Real-Time Updates** — Server-Sent Events push scan results and status changes to the dashboard instantly
+- **Dashboard** — Live stats, recent systems, status distribution, activity timeline
+- **Activity Logging** — Complete audit trail tracking all user actions
+- **Search & Filter** — Find systems by hostname, status, OS
+- **Responsive Design** — Mobile-friendly with card/table views
+
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|------------|
-| **Frontend** | Next.js 15, Tailwind CSS, shadcn/ui |
-| **Backend** | Express.js, TypeScript |
-| **Database** | PostgreSQL (Neon) |
-| **ORM** | Prisma |
-| **Auth** | JWT + bcrypt |
-| **Monorepo** | Turborepo |
-| **Quality** | ESLint, Prettier, Husky |
+| Frontend | Next.js 16, React 19, Tailwind CSS, shadcn/ui |
+| Backend | Express.js, TypeScript |
+| Database | PostgreSQL (Neon), Prisma ORM |
+| Auth | JWT + bcrypt |
+| Real-Time | Server-Sent Events (SSE) |
+| Monorepo | Turborepo, npm workspaces |
+| Quality | ESLint, Prettier, Husky, lint-staged |
+
 
 ## Project Structure
 
 ```
 infra-scope/
 ├── apps/
-│   ├── web/              # Frontend (Next.js 15)
+│   ├── web/              # Next.js 16 frontend
 │   │   ├── app/          # App router pages
-│   │   ├── components/   # React components
-│   │   └── lib/          # Utilities
-│   └── server/           # Backend (Express)
+│   │   ├── components/   # React components + shadcn/ui
+│   │   ├── contexts/     # Auth + SSE contexts
+│   │   ├── hooks/        # Custom hooks
+│   │   └── lib/          # API client, utilities
+│   └── server/           # Express.js backend
 │       ├── src/
-│       │   ├── routes/    # API routes
-│       │   ├── controllers/
-│       │   ├── services/
-│       │   ├── middleware/
-│       │   └── schemas/
-│       └── .env           # Environment variables
+│       │   ├── controllers/   # Request handlers
+│       │   ├── services/      # Business logic + event emitter
+│       │   ├── routes/        # API + SSE routes
+│       │   ├── middleware/    # Auth, role, SSE auth
+│       │   └── schemas/      # Zod validation
+│       └── .env
 ├── packages/
-│   ├── config/           # Shared configs
-│   └── db/               # Prisma schema
-└── .claude/              # Project docs & progress
+│   ├── config/           # Shared ESLint + tsconfig
+│   └── db/               # Prisma schema + generated client
+└── turbo.json            # Turborepo pipeline config
 ```
+
 
 ## Getting Started
 
 ### Prerequisites
-- Node.js 18+
+- Node.js 24 (`engine-strict` via `.nvmrc`)
 - PostgreSQL database (Neon recommended)
 
 ### Environment Variables
@@ -79,15 +97,12 @@ NODE_ENV=development
 ### Setup
 
 ```bash
-# Copy environment files
-cp apps/server/.env.example apps/server/.env
-cp apps/web/.env.example apps/web/.env
-
 # Install dependencies
 npm install
 
 # Set up database
-npx prisma db push
+npm run db:push
+npm run db:seed
 
 # Start development
 npm run dev
@@ -95,6 +110,7 @@ npm run dev
 
 Frontend: http://localhost:3000
 Backend API: http://localhost:3001
+
 
 ## Deployment
 
@@ -104,27 +120,28 @@ Backend API: http://localhost:3001
 | **Render** | Backend API |
 | **Vercel** | Frontend app |
 
-## Challenges & Future Improvements
 
-**Challenges:**
-- Learning Next.js 15 App Router (new patterns)
-- Prisma in monorepo setup
-- JWT refresh tokens not implemented (tokens expire after 7 days)
-- Admin promotion requires manual DB update
-- Badge contrast issues on dark backgrounds
+## What I Learned
 
-**Future Improvements:**
+- **Next.js 16 App Router** — server components, client components, routing patterns
+- **Prisma in a monorepo** — managing database schema as a shared package
+- **JWT from scratch** — token creation, verification, route protection
+- **Role-based authorization** — scoping data access by user role
+- **Server-Sent Events** — real-time server push without WebSockets
+- **Monorepo tooling** — Turborepo pipelines, caching, workspace dependencies
+- **Component-driven UI** — building with shadcn/ui and Tailwind design system
+
+
+## What I'd Improve Next
+
 - Real SSH connections for actual system monitoring
-- WebSocket for live status updates
 - JWT refresh token rotation
 - Admin promotion UI
-- System groups/labels
 - Alert notifications (email, webhook)
-- Dark mode toggle
-- Export data (CSV, JSON)
-- More detailed charts/analytics
-- Rate limiting on API
+- Data export (CSV, JSON)
+- Charts and analytics dashboards
+
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT — see [LICENSE](LICENSE)
