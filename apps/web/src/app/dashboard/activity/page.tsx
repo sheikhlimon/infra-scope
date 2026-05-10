@@ -4,6 +4,7 @@ import { useEffect, useState, createElement, useCallback } from 'react'
 import { useAuth } from '@/contexts/auth-context'
 import { api } from '@/lib/api'
 import { useToast } from '@/hooks/use-toast'
+import { useSSEEvents } from '@/contexts/sse-context'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -100,6 +101,7 @@ export default function ActivityPage() {
   const [loading, setLoading] = useState(true)
   const { user } = useAuth()
   const { toast } = useToast()
+  const { subscribe } = useSSEEvents()
 
   const fetchLogs = useCallback(async () => {
     try {
@@ -120,6 +122,11 @@ export default function ActivityPage() {
   useEffect(() => {
     fetchLogs()
   }, [fetchLogs])
+
+  useEffect(() => {
+    const unsub = subscribe('activity.new', () => fetchLogs())
+    return unsub
+  }, [subscribe, fetchLogs])
 
   if (!user) return null
 

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)"
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "fetch"
+  ],
+  "enableAllProjectMcpServers": true
+}

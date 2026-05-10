@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/button'
 import { Plus, Activity, Server, AlertTriangle, CheckCircle2, Clock, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { api } from '@/lib/api'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useToast } from '@/hooks/use-toast'
+import { useSSEEvents } from '@/contexts/sse-context'
 import Link from 'next/link'
 
 interface StatusStats {
@@ -71,24 +72,37 @@ function DashboardContent() {
   const [systems, setSystems] = useState<System[]>([])
   const [loading, setLoading] = useState(true)
   const { toast } = useToast()
+  const { subscribe } = useSSEEvents()
+
+  const fetchData = useCallback(async () => {
+    try {
+      const [statsData, systemsData] = await Promise.all([
+        api.get<StatsData>('/systems/stats'),
+        api.get<PaginatedSystems>('/systems'),
+      ])
+      setStats(statsData)
+      setSystems(systemsData.systems.slice(0, 5))
+    } catch {
+      toast({ title: 'Error', description: 'Failed to load dashboard data', variant: 'destructive' })
+    } finally {
+      setLoading(false)
+    }
+  }, [toast])
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const [statsData, systemsData] = await Promise.all([
-          api.get<StatsData>('/systems/stats'),
-          api.get<PaginatedSystems>('/systems'),
-        ])
-        setStats(statsData)
-        setSystems(systemsData.systems.slice(0, 5))
-      } catch {
-        toast({ title: 'Error', description: 'Failed to load dashboard data', variant: 'destructive' })
-      } finally {
-        setLoading(false)
-      }
-    }
     fetchData()
-  }, [toast])
+  }, [fetchData])
+
+  useEffect(() => {
+    const unsubStats = subscribe('stats.updated', () => fetchData())
+    const unsubStatus = subscribe('system.status_changed', () => fetchData())
+    const unsubCreated = subscribe('system.created', () => fetchData())
+    return () => {
+      unsubStats()
+      unsubStatus()
+      unsubCreated()
+    }
+  }, [subscribe, fetchData])
 
   if (loading) {
     return (

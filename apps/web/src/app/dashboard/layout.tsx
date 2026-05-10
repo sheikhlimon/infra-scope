@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Server, Activity, LogOut, Cpu, Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { SSEProvider } from '@/contexts/sse-context'
 
 const navItems = [
   { href: '/dashboard', label: 'Overview', icon: Cpu },
@@ -130,7 +131,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Main Content */}
       <main className="md:ml-64 pt-16 md:pt-0">
         <div className="p-4 md:p-8">
-          {children}
+          <SSEProvider>
+            {children}
+          </SSEProvider>
         </div>
       </main>
     </div>

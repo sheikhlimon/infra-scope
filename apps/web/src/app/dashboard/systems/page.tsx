@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { api } from '@/lib/api'
 import { useToast } from '@/hooks/use-toast'
+import { useSSEEvents } from '@/contexts/sse-context'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -88,6 +89,7 @@ function SystemsContent() {
   const { user } = useAuth()
   const router = useRouter()
   const { toast } = useToast()
+  const { subscribe } = useSSEEvents()
 
   useEffect(() => {
     const pageParam = searchParams.get('page')
@@ -117,6 +119,17 @@ function SystemsContent() {
     fetchSystems()
   }, [fetchSystems])
 
+  useEffect(() => {
+    const unsubStatus = subscribe('system.status_changed', () => fetchSystems())
+    const unsubCreated = subscribe('system.created', () => fetchSystems())
+    const unsubDeleted = subscribe('system.deleted', () => fetchSystems())
+    return () => {
+      unsubStatus()
+      unsubCreated()
+      unsubDeleted()
+    }
+  }, [subscribe, fetchSystems])
+
   const handleScan = async (id: number) => {
     setScanning(id)
     try {
@@ -125,7 +138,6 @@ function SystemsContent() {
         title: 'Scan initiated',
         description: 'System scan is running in the background',
       })
-      setTimeout(fetchSystems, 2000)
     } catch (err) {
       toast({
         title: 'Scan failed',

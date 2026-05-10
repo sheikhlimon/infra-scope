@@ -1,6 +1,7 @@
 import { prisma } from "@infra-scope/db";
 import type { CreateSystemInput, UpdateSystemInput } from "../schemas/system.schema.js";
 import * as ActivityService from "../services/activity.service.js";
+import { infraEvents } from "./events.service.js";
 
 export async function createSystem(userId: number, data: CreateSystemInput) {
   const system = await prisma.system.create({
@@ -13,6 +14,8 @@ export async function createSystem(userId: number, data: CreateSystemInput) {
     },
   });
   await ActivityService.logActivity("system.created", userId, system.id);
+  infraEvents.emitEvent("system.created", { systemId: system.id, hostname: system.hostname, ownerId: userId });
+  infraEvents.emitEvent("stats.updated", {});
   return system;
 }
 
@@ -77,6 +80,8 @@ export async function updateSystem(id: number, userId: number, userRole: string,
   });
 
   await ActivityService.logActivity("system.updated", userId, updated.id);
+  infraEvents.emitEvent("system.updated", { systemId: updated.id, hostname: updated.hostname });
+  infraEvents.emitEvent("stats.updated", {});
   return updated;
 }
 
@@ -93,6 +98,8 @@ export async function deleteSystem(id: number, userId: number, userRole: string)
 
   await prisma.system.delete({ where: { id } });
   await ActivityService.logActivity("system.deleted", userId, id);
+  infraEvents.emitEvent("system.deleted", { systemId: id, hostname: system.hostname });
+  infraEvents.emitEvent("stats.updated", {});
   return { message: "System deleted" };
 }
 
@@ -127,6 +134,8 @@ export async function scanSystem(id: number, userId: number, userRole: string) {
   });
 
   await ActivityService.logActivity("system.scanned", userId, updated.id);
+  infraEvents.emitEvent("system.status_changed", { systemId: updated.id, status: updated.status, hostname: updated.hostname });
+  infraEvents.emitEvent("stats.updated", {});
   return updated;
 }
 

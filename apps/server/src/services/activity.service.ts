@@ -1,4 +1,5 @@
 import { prisma } from "@infra-scope/db";
+import { infraEvents } from "./events.service.js";
 
 export async function logActivity(action: string, userId: number, systemId?: number) {
   await prisma.activityLog.create({
@@ -8,6 +9,7 @@ export async function logActivity(action: string, userId: number, systemId?: num
       systemId,
     },
   });
+  infraEvents.emitEvent("activity.new", { action, userId, systemId });
 }
 
 export async function getActivityLogs(userId: number, userRole: string) {
