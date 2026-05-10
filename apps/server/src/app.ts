@@ -17,7 +17,7 @@ app.use("/api/systems", systemRoutes);
 app.use("/api/activity", activityRoutes);
 app.use("/api/events", sseRoutes);
 
-app.get("/health", (_req, res) => {
+app.get("/ping", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 

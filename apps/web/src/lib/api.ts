@@ -4,26 +4,18 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
 
-const HEALTH_MAX_RETRIES = 10
-const HEALTH_RETRY_DELAY = 5000
-const HEALTH_REQUEST_TIMEOUT = 4000
-
 async function waitForServer(attempt = 1): Promise<boolean> {
-  const healthUrl = API_URL.replace('/api', '/health')
-  const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), HEALTH_REQUEST_TIMEOUT)
+  const pingUrl = API_URL.replace('/api', '/ping')
 
   try {
-    const res = await fetch(healthUrl, { method: 'GET', signal: controller.signal })
+    const res = await fetch(pingUrl, { method: 'GET' })
     if (res.ok) return true
   } catch {
-    // Server not ready or request timed out
-  } finally {
-    clearTimeout(timeout)
+    // Server not ready yet
   }
 
-  if (attempt < HEALTH_MAX_RETRIES) {
-    await new Promise(resolve => setTimeout(resolve, HEALTH_RETRY_DELAY))
+  if (attempt < 10) {
+    await new Promise(resolve => setTimeout(resolve, 5000))
     return waitForServer(attempt + 1)
   }
 
@@ -48,18 +40,11 @@ async function request<T>(
   let res: Response
 
   try {
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 8000)
-    try {
-      res = await fetch(`${API_URL}${endpoint}`, {
-        method,
-        headers,
-        body: body ? JSON.stringify(body) : undefined,
-        signal: controller.signal,
-      })
-    } finally {
-      clearTimeout(timeout)
-    }
+    res = await fetch(`${API_URL}${endpoint}`, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+    })
   } catch {
     // Network error — server is likely sleeping
     const { dismiss } = toast({
