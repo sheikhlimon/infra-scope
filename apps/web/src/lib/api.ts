@@ -6,15 +6,20 @@ type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
 
 const HEALTH_MAX_RETRIES = 10
 const HEALTH_RETRY_DELAY = 5000
+const HEALTH_REQUEST_TIMEOUT = 4000
 
 async function waitForServer(attempt = 1): Promise<boolean> {
   const healthUrl = API_URL.replace('/api', '/health')
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), HEALTH_REQUEST_TIMEOUT)
 
   try {
-    const res = await fetch(healthUrl, { method: 'GET' })
+    const res = await fetch(healthUrl, { method: 'GET', signal: controller.signal })
     if (res.ok) return true
   } catch {
-    // Server not ready yet
+    // Server not ready or request timed out
+  } finally {
+    clearTimeout(timeout)
   }
 
   if (attempt < HEALTH_MAX_RETRIES) {
