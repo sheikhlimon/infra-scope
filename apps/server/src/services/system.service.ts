@@ -1,4 +1,5 @@
 import { exec } from "child_process";
+import net from "net";
 import { prisma } from "@infra-scope/db";
 import type { CreateSystemInput, UpdateSystemInput } from "../schemas/system.schema.js";
 import * as ActivityService from "../services/activity.service.js";
@@ -116,7 +117,7 @@ export async function deleteSystem(id: number, userId: number, userRole: string)
 interface ProbeResult {
   status: "ACTIVE" | "ERROR";
   latencyMs: number;
-  method: "ping" | "unreachable";
+  method: "ping" | "tcp" | "unreachable";
 }
 
 export function probeSystem(hostname: string, ipAddress: string): Promise<ProbeResult> {
@@ -135,11 +136,34 @@ export function probeSystem(hostname: string, ipAddress: string): Promise<ProbeR
         });
       }
 
-      return resolve({
-        status: "ERROR",
-        latencyMs,
-        method: "unreachable",
-      });
+      // Cloud container fallback: test TCP handshake on standard port 443
+      // Render containers often block raw ICMP echo sockets while permitting standard TCP traffic
+      const socket = new net.Socket();
+      socket.setTimeout(2500);
+
+      const onConnect = () => {
+        socket.destroy();
+        resolve({
+          status: "ACTIVE",
+          latencyMs: Date.now() - start,
+          method: "tcp",
+        });
+      };
+
+      const onError = () => {
+        socket.destroy();
+        resolve({
+          status: "ERROR",
+          latencyMs: Date.now() - start,
+          method: "unreachable",
+        });
+      };
+
+      socket.once("connect", onConnect);
+      socket.once("timeout", onError);
+      socket.once("error", onError);
+
+      socket.connect(443, target);
     });
   });
 }

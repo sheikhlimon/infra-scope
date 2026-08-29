@@ -1,147 +1,159 @@
 # InfraScope
 
-Full-stack infrastructure monitoring and management dashboard built from scratch.
+> Full-stack infrastructure inventory explorer, live reachability prober, and real-time event dashboard built with Next.js 16, Express, Prisma, and PostgreSQL in a Turborepo monorepo.
 
-## What Is This?
+---
 
-InfraScope is a web-based platform where system administrators can view server status, manage infrastructure records, and maintain an audit log — all from a single interface. Instead of SSHing into multiple servers individually, admins can track everything from one centralized dashboard.
+## What Is InfraScope?
 
-**Note:** Scanning is simulated. No real SSH connections are made.
+**InfraScope** is a visual infrastructure catalog and management platform designed to turn complex, flat Infrastructure-as-Code repositories into an interactive web interface.
 
+Instead of grepping hundreds of raw YAML files in a terminal, InfraScope ingests and visualizes **399 real production and staging servers from the Fedora Linux Project's Ansible repository**, runs credential-free reachability probes, and streams live RPM builds and infrastructure events directly from the Fedora Messaging bus (via Datagrepper).
+
+---
+
+## Key Features
+
+* **Fedora Infrastructure Fleet Catalog**: Ingests and maps ~400 real enterprise servers across RDU3, AWS, and cloud datacenters, including hypervisors (`vmhost-x86-*`), builder nodes, database clusters, and web proxies.
+* **Automated Spec Extraction**: Extracts real hardware capacities (CPU cores, RAM up to 256 GB) and operating system releases (Red Hat Enterprise Linux 10, Fedora 44 Server, CentOS Stream) directly from Ansible `host_vars`.
+* **Live Reachability Probes**: Measures live round-trip latency using ICMP echo and TCP handshake fallbacks without requiring SSH keys or 2FA/OTP passwords.
+* **Fedora Live Pulse (Datagrepper Stream)**: Connects to the public Fedora Messaging archive to stream live Koji RPM builds, Bodhi releases, and infrastructure tasks with sub-second timestamps and direct task links.
+* **Zero-Bloat Separation of Concerns**: Separates local immutable audit logs (stored in PostgreSQL) from high-volume external message streams (queried statelessly on demand).
+* **Real-Time Reactive Streaming (SSE)**: Uses Server-Sent Events to push scan results, status changes, and inventory updates to connected browser sessions instantly.
+* **Pagination & Fleet Navigation**: Fast server-side paginated table supporting 25, 50, or 100 items per page with instant text search and status filtering.
+
+---
 
 ## Architecture
 
 ```
-┌─────────────┐     HTTP/REST     ┌───────────────┐     Prisma      ┌──────────────┐
-│             │ ────────────────► │               │ ──────────────► │              │
-│  Next.js 16 │                   │  Express.js   │                 │  PostgreSQL  │
-│  Frontend   │ ◄──────────────── │   Backend     │ ◄────────────── │   (Neon)     │
-│             │    JSON Response  │               │     Queries     │              │
-└─────────────┘                   └───────────────┘                 └──────────────┘
-                                         │
-                                    SSE Push ──► Real-time updates to all connected clients
+┌─────────────────────────────────────────────────────────────────────────┐
+│                           Next.js 16 Frontend                           │
+│              (React 19, Tailwind CSS, shadcn/ui on Vercel)              │
+└────────────────────────────────────┬────────────────────────────────────┘
+                                     │
+                        HTTPS REST & SSE (/api/*)
+                                     │
+┌────────────────────────────────────▼────────────────────────────────────┐
+│                           Express 4 API Server                          │
+│                     (TypeScript, Zod on Render)                         │
+└───────────┬────────────────────────┬─────────────────────────┬──────────┘
+            │                        │                         │
+     SQL Queries (Prisma)     HTTPS Fetch (Port 443)     ICMP / TCP Probes
+            │                        │                         │
+┌───────────▼───────────┐ ┌──────────▼───────────┐ ┌───────────▼──────────┐
+│   Neon PostgreSQL     │ │  Fedora Datagrepper  │ │   Fedora Fleet Hosts │
+│  (Users, Fleet, Logs) │ │ (Live Koji / Bodhi)  │ │ (bastion, proxy, ns) │
+└───────────────────────┘ └──────────────────────┘ └──────────────────────┘
 ```
 
-
-## Key Features
-
-- **Authentication** — User registration and JWT-based login
-- **Role-Based Access** — Admin sees all systems, User sees only their own
-- **System CRUD** — Create, view, edit, delete infrastructure records
-- **Real-Time Updates** — Server-Sent Events push scan results and status changes to the dashboard instantly
-- **Dashboard** — Live stats, recent systems, status distribution, activity timeline
-- **Activity Logging** — Complete audit trail tracking all user actions
-- **Search & Filter** — Find systems by hostname, status, OS
-- **Responsive Design** — Mobile-friendly with card/table views
-
+---
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|------------|
-| Frontend | Next.js 16, React 19, Tailwind CSS, shadcn/ui |
-| Backend | Express.js, TypeScript |
-| Database | PostgreSQL (Neon), Prisma ORM |
-| Auth | JWT + bcrypt |
-| Real-Time | Server-Sent Events (SSE) |
-| Monorepo | Turborepo, npm workspaces |
-| Quality | ESLint, Prettier, Husky, lint-staged |
+| Layer | Technology | Description |
+| :--- | :--- | :--- |
+| **Frontend** | Next.js 16 (App Router), React 19 | Fast server-side rendering and client components |
+| **Styling** | Tailwind CSS, shadcn/ui, Lucide Icons | Accessible, high-contrast terminal-inspired UI |
+| **Backend** | Express 4, TypeScript | Strict `service → controller → route` layered API |
+| **Database** | PostgreSQL (Neon Serverless), Prisma ORM | Relational modeling with migrations and connection pooling |
+| **Data Source** | Fedora Project Ansible Repository | 399 hosts, group hierarchies, and hardware specs |
+| **Live Stream** | Fedora Messaging (Datagrepper REST API) | Real-time Koji builds, Bodhi updates, and git events |
+| **Monorepo** | Turborepo, npm workspaces | Coordinated builds, shared ESLint/TS configs |
+| **Runtime** | Node.js 24 | Managed via `.nvmrc` with strict engine enforcement |
 
+---
 
 ## Project Structure
 
 ```
 infra-scope/
 ├── apps/
-│   ├── web/              # Next.js 16 frontend
-│   │   ├── app/          # App router pages
-│   │   ├── components/   # React components + shadcn/ui
-│   │   ├── contexts/     # Auth + SSE contexts
-│   │   ├── hooks/        # Custom hooks
-│   │   └── lib/          # API client, utilities
-│   └── server/           # Express.js backend
-│       ├── src/
-│       │   ├── controllers/   # Request handlers
-│       │   ├── services/      # Business logic + event emitter
-│       │   ├── routes/        # API + SSE routes
-│       │   ├── middleware/    # Auth, role, SSE auth
-│       │   └── schemas/      # Zod validation
-│       └── .env
+│   ├── web/                    # Next.js 16 App Router frontend
+│   │   ├── src/app/            # App router pages (dashboard, systems, activity)
+│   │   ├── src/components/     # shadcn/ui components + layouts
+│   │   └── src/contexts/       # Auth & SSE event streaming contexts
+│   └── server/                 # Express REST API backend
+│       └── src/
+│           ├── controllers/    # Express request controllers
+│           ├── services/       # Ansible ingestion, reachability probe, Datagrepper
+│           ├── routes/         # Authenticated route declarations
+│           └── schemas/        # Zod request validation schemas
 ├── packages/
-│   ├── config/           # Shared ESLint + tsconfig
-│   └── db/               # Prisma schema + generated client
-└── turbo.json            # Turborepo pipeline config
+│   ├── db/                     # Prisma schema, migrations, and CLI sync scripts
+│   └── config/                 # Shared base ESLint flat configs and tsconfigs
+└── turbo.json                  # Turborepo task pipeline
 ```
 
+---
 
 ## Getting Started
 
 ### Prerequisites
-- Node.js 24 (`engine-strict` via `.nvmrc`)
-- PostgreSQL database (Neon recommended)
+* **Node.js 24** (recommended: `nvm use` or `fnm use`)
+* A **PostgreSQL** database (e.g. Neon Serverless)
 
-### Environment Variables
-
+### 1. Clone & Install
 ```bash
-# Database
-DATABASE_URL="postgresql://..."
+git clone https://github.com/sheikhlimon/infra-scope.git
+cd infra-scope
+npm install
+```
 
-# Auth (generate with: openssl rand -base64 32)
-JWT_SECRET="your-random-secret-key"
+### 2. Environment Variables
 
-# Server
+Create `.env` in `apps/server/`:
+```env
+DATABASE_URL="postgresql://user:password@ep-your-neon-host.aws.neon.tech/neondb?sslmode=require"
+JWT_SECRET="your-secure-random-jwt-secret"
 PORT=3001
 NODE_ENV=development
 ```
 
-### Setup
-
-```bash
-# Install dependencies
-npm install
-
-# Set up database
-npm run db:push
-npm run db:seed
-
-# Start development
-npm run dev
+Create `.env` in `apps/web/`:
+```env
+NEXT_PUBLIC_API_URL="http://localhost:3001/api"
 ```
 
-Frontend: http://localhost:3000
-Backend API: http://localhost:3001
+### 3. Database Setup & Sync
+```bash
+# Push Prisma schema to Neon PostgreSQL
+npm run db:push
 
+# Seed admin user (admin@infrascope.dev / admin123)
+npm run db:seed
 
-## Deployment
+# Ingest Fedora Ansible inventory (optional CLI sync)
+npm run db:sync-ansible
+```
 
-| Service | Purpose |
-|---------|---------|
-| **Neon** | PostgreSQL database |
-| **Render** | Backend API |
-| **Vercel** | Frontend app |
+### 4. Run Development Server
+```bash
+npm run dev
+```
+Open **`http://localhost:3000`** in your browser and sign in with `admin@infrascope.dev` / `admin123`.
 
+---
 
-## What I Learned
+## Quality & Verification
 
-- **Next.js 16 App Router** — server components, client components, routing patterns
-- **Prisma in a monorepo** — managing database schema as a shared package
-- **JWT from scratch** — token creation, verification, route protection
-- **Role-based authorization** — scoping data access by user role
-- **Server-Sent Events** — real-time server push without WebSockets
-- **Monorepo tooling** — Turborepo pipelines, caching, workspace dependencies
-- **Component-driven UI** — building with shadcn/ui and Tailwind design system
+Every package is strictly checked with zero TypeScript or ESLint warnings:
 
+```bash
+npm run check    # runs lint + typecheck across all 4 monorepo packages
+npm run build    # builds all packages in dependency order via Turborepo
+```
 
-## What I'd Improve Next
+---
 
-- Real SSH connections for actual system monitoring
-- JWT refresh token rotation
-- Admin promotion UI
-- Alert notifications (email, webhook)
-- Data export (CSV, JSON)
-- Charts and analytics dashboards
+## Cloud Deployment
 
+* **Frontend (Vercel)**: Point Vercel to `apps/web`. Set `NEXT_PUBLIC_API_URL` to your production Render API URL.
+* **Backend (Render)**: Deploy `apps/server` as a Node Web Service. Configure `DATABASE_URL` and `JWT_SECRET`.
+* **Database (Neon)**: Serverless PostgreSQL connects automatically over SSL.
+
+---
 
 ## License
 
-MIT — see [LICENSE](LICENSE)
+MIT © [Sheikh Limon](https://github.com/sheikhlimon)

@@ -132,6 +132,8 @@ export default function ActivityPage() {
   const { toast } = useToast();
   const { subscribe } = useSSEEvents();
 
+  const [autoStream, setAutoStream] = useState(true);
+
   const fetchLogs = useCallback(async () => {
     try {
       const data = await api.get<ActivityLog[]>("/activity");
@@ -172,6 +174,22 @@ export default function ActivityPage() {
     const unsub = subscribe("activity.new", () => fetchLogs());
     return unsub;
   }, [subscribe, fetchLogs]);
+
+  // Auto-stream Fedora live events every 10 seconds
+  useEffect(() => {
+    if (activeTab !== "fedora" || !autoStream) return;
+    const interval = setInterval(() => {
+      api
+        .get<FedoraLiveEvent[]>("/activity/fedora-live")
+        .then((data) => {
+          if (Array.isArray(data) && data.length > 0) {
+            setFedoraEvents(data);
+          }
+        })
+        .catch(() => {});
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [activeTab, autoStream]);
 
   if (!user) return null;
 
@@ -223,16 +241,36 @@ export default function ActivityPage() {
           </div>
 
           {activeTab === "fedora" && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={fetchFedoraEvents}
-              disabled={fedoraLoading}
-              className="font-mono text-xs h-8 rounded-sm"
-            >
-              <RefreshCw className={`h-3 w-3 mr-1.5 ${fedoraLoading ? "animate-spin" : ""}`} />
-              REFRESH
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setAutoStream((prev) => !prev)}
+                className={`font-mono text-xs h-8 rounded-sm transition-colors ${
+                  autoStream
+                    ? "border-emerald-500/40 text-emerald-400 bg-emerald-500/10"
+                    : "text-muted-foreground"
+                }`}
+                title="Toggle live auto-streaming (polls every 10s)"
+              >
+                <span
+                  className={`h-1.5 w-1.5 rounded-full mr-1.5 ${
+                    autoStream ? "bg-emerald-400 animate-pulse" : "bg-muted-foreground"
+                  }`}
+                />
+                {autoStream ? "AUTO_STREAM" : "PAUSED"}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={fetchFedoraEvents}
+                disabled={fedoraLoading}
+                className="font-mono text-xs h-8 rounded-sm"
+              >
+                <RefreshCw className={`h-3 w-3 mr-1.5 ${fedoraLoading ? "animate-spin" : ""}`} />
+                REFRESH
+              </Button>
+            </div>
           )}
         </div>
       </div>
