@@ -1,0 +1,37 @@
+name: Sync Fedora Ansible Inventory
+
+on:
+  schedule:
+    # Run once every 24 hours at 02:00 UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allows manual run on demand from GitHub UI
+
+jobs:
+  sync-inventory:
+    name: Ingest Upstream Fedora Inventory
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fetch upstream Fedora Ansible repo
+        run: |
+          git clone --depth 1 https://forge.fedoraproject.org/infra/ansible.git /tmp/fedora-ansible
+
+      - name: Run Inventory Ingestion
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          ANSIBLE_INVENTORY_PATH: /tmp/fedora-ansible/inventory
+        run: |
+          npm run db:generate
+          npm run db:sync-ansible
