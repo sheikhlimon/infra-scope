@@ -1,15 +1,16 @@
-'use client'
+"use client";
 
-import { useEffect, useState, Suspense, useCallback } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useAuth } from '@/contexts/auth-context'
-import { api } from '@/lib/api'
-import { useToast } from '@/hooks/use-toast'
-import { useSSEEvents } from '@/contexts/sse-context'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
+import { useEffect, useState, Suspense, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@/contexts/auth-context";
+import { api } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
+import { useSSEEvents } from "@/contexts/sse-context";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -17,7 +18,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from "@/components/ui/table";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,167 +28,207 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import { Plus, Eye, RefreshCw, Trash2, Server, Activity, Search, X, ChevronLeft, ChevronRight } from 'lucide-react'
+} from "@/components/ui/alert-dialog";
+import {
+  Plus,
+  Eye,
+  RefreshCw,
+  Trash2,
+  Server,
+  Activity,
+  Search,
+  X,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 interface PaginatedSystemsResponse {
-  systems: System[]
+  systems: System[];
   pagination: {
-    total: number
-    page: number
-    limit: number
-    totalPages: number
-  }
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }
 
 interface System {
-  id: number
-  hostname: string
-  ipAddress: string
-  os: string
-  status: 'ACTIVE' | 'INACTIVE' | 'SCANNING' | 'ERROR'
-  lastScannedAt: string | null
-  createdAt: string
-  cpuCores?: number | null
-  memoryGB?: number | null
+  id: number;
+  hostname: string;
+  ipAddress: string;
+  os: string;
+  status: "ACTIVE" | "INACTIVE" | "SCANNING" | "ERROR";
+  lastScannedAt: string | null;
+  createdAt: string;
+  cpuCores?: number | null;
+  memoryGB?: number | null;
 }
 
 const statusConfig = {
   ACTIVE: {
-    label: 'ACTIVE',
-    className: 'bg-emerald-600 text-white border-emerald-600',
-    dot: 'bg-white',
+    label: "ACTIVE",
+    className: "bg-emerald-600 text-white border-emerald-600",
+    dot: "bg-white",
   },
   INACTIVE: {
-    label: 'INACTIVE',
-    className: 'bg-muted/30 text-muted-foreground border-border/50',
-    dot: 'bg-muted-foreground/40',
+    label: "INACTIVE",
+    className: "bg-muted/30 text-muted-foreground border-border/50",
+    dot: "bg-muted-foreground/40",
   },
   SCANNING: {
-    label: 'SCANNING',
-    className: 'bg-amber-500 text-white border-amber-500',
-    dot: 'bg-white animate-pulse',
+    label: "SCANNING",
+    className: "bg-amber-500 text-white border-amber-500",
+    dot: "bg-white animate-pulse",
   },
   ERROR: {
-    label: 'ERROR',
-    className: 'bg-rose-600 text-white border-rose-600',
-    dot: 'bg-white',
+    label: "ERROR",
+    className: "bg-rose-600 text-white border-rose-600",
+    dot: "bg-white",
   },
-}
+};
 
 function SystemsContent() {
-  const searchParams = useSearchParams()
-  const [systems, setSystems] = useState<System[]>([])
-  const [loading, setLoading] = useState(true)
-  const [scanning, setScanning] = useState<number | null>(null)
-  const [deleteId, setDeleteId] = useState<number | null>(null)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'INACTIVE' | 'SCANNING' | 'ERROR'>('ALL')
-  const [page, setPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [total, setTotal] = useState(0)
-  const { user } = useAuth()
-  const router = useRouter()
-  const { toast } = useToast()
-  const { subscribe } = useSSEEvents()
+  const searchParams = useSearchParams();
+  const [systems, setSystems] = useState<System[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [scanning, setScanning] = useState<number | null>(null);
+  const [syncing, setSyncing] = useState(false);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<
+    "ALL" | "ACTIVE" | "INACTIVE" | "SCANNING" | "ERROR"
+  >("ALL");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const { user } = useAuth();
+  const router = useRouter();
+  const { toast } = useToast();
+  const { subscribe } = useSSEEvents();
 
   useEffect(() => {
-    const pageParam = searchParams.get('page')
+    const pageParam = searchParams.get("page");
     if (pageParam) {
-      setPage(parseInt(pageParam) || 1)
+      setPage(parseInt(pageParam) || 1);
     }
-  }, [searchParams])
+  }, [searchParams]);
 
   const fetchSystems = useCallback(async () => {
     try {
-      const data = await api.get<PaginatedSystemsResponse>(`/systems?page=${page}&limit=10`)
-      setSystems(data.systems)
-      setTotalPages(data.pagination.totalPages)
-      setTotal(data.pagination.total)
+      const data = await api.get<PaginatedSystemsResponse>(`/systems?page=${page}&limit=10`);
+      setSystems(data.systems);
+      setTotalPages(data.pagination.totalPages);
+      setTotal(data.pagination.total);
     } catch (err) {
       toast({
-        title: 'Failed to load systems',
-        description: err instanceof Error ? err.message : 'Please try again',
-        variant: 'destructive',
-      })
+        title: "Failed to load systems",
+        description: err instanceof Error ? err.message : "Please try again",
+        variant: "destructive",
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [page, toast])
+  }, [page, toast]);
 
   useEffect(() => {
-    fetchSystems()
-  }, [fetchSystems])
+    fetchSystems();
+  }, [fetchSystems]);
 
   useEffect(() => {
-    const unsubStatus = subscribe('system.status_changed', () => fetchSystems())
-    const unsubCreated = subscribe('system.created', () => fetchSystems())
-    const unsubDeleted = subscribe('system.deleted', () => fetchSystems())
+    const unsubStatus = subscribe("system.status_changed", () => fetchSystems());
+    const unsubCreated = subscribe("system.created", () => fetchSystems());
+    const unsubDeleted = subscribe("system.deleted", () => fetchSystems());
     return () => {
-      unsubStatus()
-      unsubCreated()
-      unsubDeleted()
-    }
-  }, [subscribe, fetchSystems])
+      unsubStatus();
+      unsubCreated();
+      unsubDeleted();
+    };
+  }, [subscribe, fetchSystems]);
 
   const handleScan = async (id: number) => {
-    setScanning(id)
+    setScanning(id);
     try {
-      await api.post(`/systems/${id}/scan`, {})
+      await api.post(`/systems/${id}/scan`, {});
       toast({
-        title: 'Scan initiated',
-        description: 'System scan is running in the background',
-      })
+        title: "Scan initiated",
+        description: "System scan is running in the background",
+      });
     } catch (err) {
       toast({
-        title: 'Scan failed',
-        description: err instanceof Error ? err.message : 'Please try again',
-        variant: 'destructive',
-      })
+        title: "Scan failed",
+        description: err instanceof Error ? err.message : "Please try again",
+        variant: "destructive",
+      });
     } finally {
-      setScanning(null)
+      setScanning(null);
     }
-  }
+  };
+
+  const handleSyncAnsible = async () => {
+    setSyncing(true);
+    try {
+      const res = await api.post<{
+        success: boolean;
+        total: number;
+        created: number;
+        updated: number;
+        message: string;
+      }>("/systems/sync-ansible", {});
+      toast({
+        title: "Ansible Sync Complete",
+        description: res.message || `Synced ${res.total} systems from Fedora Ansible.`,
+      });
+      fetchSystems();
+    } catch (err) {
+      toast({
+        title: "Sync failed",
+        description: err instanceof Error ? err.message : "Failed to sync from Fedora Ansible",
+        variant: "destructive",
+      });
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const handleDelete = async () => {
-    if (!deleteId) return
+    if (!deleteId) return;
     try {
-      await api.delete(`/systems/${deleteId}`)
+      await api.delete(`/systems/${deleteId}`);
       toast({
-        title: 'System deleted',
-        description: 'The system has been removed',
-      })
-      setDeleteId(null)
-      fetchSystems()
+        title: "System deleted",
+        description: "The system has been removed",
+      });
+      setDeleteId(null);
+      fetchSystems();
     } catch (err) {
       toast({
-        title: 'Delete failed',
-        description: err instanceof Error ? err.message : 'Please try again',
-        variant: 'destructive',
-      })
+        title: "Delete failed",
+        description: err instanceof Error ? err.message : "Please try again",
+        variant: "destructive",
+      });
     }
-  }
+  };
 
-  const activeCount = (systems || []).filter(s => s.status === 'ACTIVE').length
-  const scanningCount = (systems || []).filter(s => s.status === 'SCANNING').length
-  const errorCount = (systems || []).filter(s => s.status === 'ERROR').length
-  const safeSystems = systems || []
+  const activeCount = (systems || []).filter((s) => s.status === "ACTIVE").length;
+  const scanningCount = (systems || []).filter((s) => s.status === "SCANNING").length;
+  const errorCount = (systems || []).filter((s) => s.status === "ERROR").length;
+  const safeSystems = systems || [];
 
-  const filteredSystems = (systems || []).filter(system => {
+  const filteredSystems = (systems || []).filter((system) => {
     const matchesSearch =
-      searchTerm === '' ||
+      searchTerm === "" ||
       system.hostname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      system.ipAddress.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = statusFilter === 'ALL' || system.status === statusFilter
-    return matchesSearch && matchesStatus
-  })
+      system.ipAddress.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "ALL" || system.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   const clearFilters = () => {
-    setSearchTerm('')
-    setStatusFilter('ALL')
-  }
+    setSearchTerm("");
+    setStatusFilter("ALL");
+  };
 
-  if (!user) return null
+  if (!user) return null;
 
   return (
     <div className="space-y-6">
@@ -203,13 +244,24 @@ function SystemsContent() {
               Infrastructure monitoring endpoints
             </p>
           </div>
-          <Button
-            onClick={() => router.push('/dashboard/systems/new')}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 font-mono text-xs"
-          >
-            <Plus className="mr-2 h-3 w-3" />
-            ADD_SYSTEM
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={handleSyncAnsible}
+              disabled={syncing}
+              className="font-mono text-xs border-border/80"
+            >
+              <RefreshCw className={cn("mr-2 h-3 w-3", syncing && "animate-spin")} />
+              {syncing ? "SYNCING..." : "SYNC_ANSIBLE"}
+            </Button>
+            <Button
+              onClick={() => router.push("/dashboard/systems/new")}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 font-mono text-xs"
+            >
+              <Plus className="mr-2 h-3 w-3" />
+              ADD_SYSTEM
+            </Button>
+          </div>
         </div>
 
         {/* Status bar */}
@@ -218,7 +270,9 @@ function SystemsContent() {
             <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-primary/40" />
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">Total</p>
+                <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">
+                  Total
+                </p>
                 <p className="text-lg font-mono font-bold">{total}</p>
               </div>
               <Server className="h-4 w-4 text-muted-foreground/50" />
@@ -228,7 +282,9 @@ function SystemsContent() {
             <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-emerald-500/40" />
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">Active</p>
+                <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">
+                  Active
+                </p>
                 <p className="text-lg font-mono font-bold text-emerald-400">{activeCount}</p>
               </div>
               <div className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
@@ -238,7 +294,9 @@ function SystemsContent() {
             <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-amber-500/40" />
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">Scanning</p>
+                <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">
+                  Scanning
+                </p>
                 <p className="text-lg font-mono font-bold text-amber-400">{scanningCount}</p>
               </div>
               <Activity className="h-4 w-4 text-amber-400/60 animate-pulse" />
@@ -248,7 +306,9 @@ function SystemsContent() {
             <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-rose-500/40" />
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">Error</p>
+                <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">
+                  Error
+                </p>
                 <p className="text-lg font-mono font-bold text-rose-400">{errorCount}</p>
               </div>
               <div className="h-2 w-2 rounded-full bg-rose-400 shadow-[0_0_8px_rgba(251,113,133,0.6)]" />
@@ -266,12 +326,12 @@ function SystemsContent() {
               type="text"
               placeholder="Search by hostname or IP..."
               value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 font-mono text-sm bg-muted/20 border-border/60"
             />
             {searchTerm && (
               <button
-                onClick={() => setSearchTerm('')}
+                onClick={() => setSearchTerm("")}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
                 <X className="h-4 w-4" />
@@ -279,21 +339,21 @@ function SystemsContent() {
             )}
           </div>
           <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 scrollbar-hide">
-            {(['ALL', 'ACTIVE', 'INACTIVE', 'SCANNING', 'ERROR'] as const).map(status => (
+            {(["ALL", "ACTIVE", "INACTIVE", "SCANNING", "ERROR"] as const).map((status) => (
               <button
                 key={status}
                 onClick={() => setStatusFilter(status)}
                 className={`px-3 py-1.5 text-[10px] font-mono uppercase border rounded transition-colors ${
                   statusFilter === status
-                    ? 'bg-primary text-primary-foreground border-primary'
-                    : 'bg-muted/20 text-muted-foreground border-border/60 hover:bg-muted/30'
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-muted/20 text-muted-foreground border-border/60 hover:bg-muted/30"
                 }`}
               >
-                {status === 'ALL' ? 'All' : status.toLowerCase()}
+                {status === "ALL" ? "All" : status.toLowerCase()}
               </button>
             ))}
           </div>
-          {(searchTerm || statusFilter !== 'ALL') && (
+          {(searchTerm || statusFilter !== "ALL") && (
             <Button
               variant="ghost"
               size="sm"
@@ -323,13 +383,27 @@ function SystemsContent() {
         <Table>
           <TableHeader>
             <TableRow className="border-border/60 hover:bg-transparent bg-muted/20">
-              <TableHead className="font-mono text-[10px] uppercase tracking-wider py-3">Hostname</TableHead>
-              <TableHead className="font-mono text-[10px] uppercase tracking-wider py-3">Address</TableHead>
-              <TableHead className="font-mono text-[10px] uppercase tracking-wider py-3">OS</TableHead>
-              <TableHead className="font-mono text-[10px] uppercase tracking-wider py-3">Specs</TableHead>
-              <TableHead className="font-mono text-[10px] uppercase tracking-wider py-3">Status</TableHead>
-              <TableHead className="font-mono text-[10px] uppercase tracking-wider py-3">Last Scan</TableHead>
-              <TableHead className="font-mono text-[10px] uppercase tracking-wider py-3 text-right">Actions</TableHead>
+              <TableHead className="font-mono text-[10px] uppercase tracking-wider py-3">
+                Hostname
+              </TableHead>
+              <TableHead className="font-mono text-[10px] uppercase tracking-wider py-3">
+                Address
+              </TableHead>
+              <TableHead className="font-mono text-[10px] uppercase tracking-wider py-3">
+                OS
+              </TableHead>
+              <TableHead className="font-mono text-[10px] uppercase tracking-wider py-3">
+                Specs
+              </TableHead>
+              <TableHead className="font-mono text-[10px] uppercase tracking-wider py-3">
+                Status
+              </TableHead>
+              <TableHead className="font-mono text-[10px] uppercase tracking-wider py-3">
+                Last Scan
+              </TableHead>
+              <TableHead className="font-mono text-[10px] uppercase tracking-wider py-3 text-right">
+                Actions
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -350,11 +424,13 @@ function SystemsContent() {
                       <Server className="h-5 w-5 text-muted-foreground/40" />
                     </div>
                     <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground font-mono">NO_SYSTEMS_CONFIGURED</p>
+                      <p className="text-sm text-muted-foreground font-mono">
+                        NO_SYSTEMS_CONFIGURED
+                      </p>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => router.push('/dashboard/systems/new')}
+                        onClick={() => router.push("/dashboard/systems/new")}
                         className="font-mono text-xs"
                       >
                         <Plus className="mr-2 h-3 w-3" />
@@ -401,7 +477,7 @@ function SystemsContent() {
                     {system.cpuCores || system.memoryGB ? (
                       <span className="font-mono">
                         {system.cpuCores && `${system.cpuCores}C`}
-                        {system.cpuCores && system.memoryGB && ' / '}
+                        {system.cpuCores && system.memoryGB && " / "}
                         {system.memoryGB && `${system.memoryGB}GB`}
                       </span>
                     ) : (
@@ -413,14 +489,18 @@ function SystemsContent() {
                       variant="outline"
                       className={`text-[10px] font-mono uppercase px-2 py-0.5 ${statusConfig[system.status].className}`}
                     >
-                      <span className={`h-1.5 w-1.5 rounded-full mr-1.5 ${statusConfig[system.status].dot}`} />
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full mr-1.5 ${statusConfig[system.status].dot}`}
+                      />
                       {statusConfig[system.status].label}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground font-mono py-3">
-                    {system.lastScannedAt
-                      ? new Date(system.lastScannedAt).toLocaleString()
-                      : <span className="text-muted-foreground/50">NEVER</span>}
+                    {system.lastScannedAt ? (
+                      new Date(system.lastScannedAt).toLocaleString()
+                    ) : (
+                      <span className="text-muted-foreground/50">NEVER</span>
+                    )}
                   </TableCell>
                   <TableCell className="text-right py-3">
                     <div className="flex justify-end gap-1">
@@ -442,7 +522,7 @@ function SystemsContent() {
                         title="Trigger scan"
                       >
                         <RefreshCw
-                          className={`h-3.5 w-3.5 ${scanning === system.id ? 'animate-spin text-amber-400' : ''}`}
+                          className={`h-3.5 w-3.5 ${scanning === system.id ? "animate-spin text-amber-400" : ""}`}
                         />
                       </Button>
                       <Button
@@ -483,7 +563,7 @@ function SystemsContent() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => router.push('/dashboard/systems/new')}
+                  onClick={() => router.push("/dashboard/systems/new")}
                   className="font-mono text-xs"
                 >
                   <Plus className="mr-2 h-3 w-3" />
@@ -529,7 +609,9 @@ function SystemsContent() {
                   variant="outline"
                   className={`text-[10px] font-mono uppercase px-2 py-0.5 ${statusConfig[system.status].className}`}
                 >
-                  <span className={`h-1 w-1 rounded-full mr-1 ${statusConfig[system.status].dot}`} />
+                  <span
+                    className={`h-1 w-1 rounded-full mr-1 ${statusConfig[system.status].dot}`}
+                  />
                   {system.status}
                 </Badge>
               </div>
@@ -543,7 +625,7 @@ function SystemsContent() {
                     <span className="font-mono uppercase">Specs:</span>
                     <span className="font-mono text-foreground">
                       {system.cpuCores && `${system.cpuCores}C`}
-                      {system.cpuCores && system.memoryGB && ' / '}
+                      {system.cpuCores && system.memoryGB && " / "}
                       {system.memoryGB && `${system.memoryGB}GB`}
                     </span>
                   </div>
@@ -553,7 +635,7 @@ function SystemsContent() {
                   <span className="text-foreground">
                     {system.lastScannedAt
                       ? new Date(system.lastScannedAt).toLocaleString()
-                      : 'Never'}
+                      : "Never"}
                   </span>
                 </div>
               </div>
@@ -574,7 +656,9 @@ function SystemsContent() {
                   disabled={scanning === system.id}
                   className="flex-1 font-mono text-xs"
                 >
-                  <RefreshCw className={`mr-2 h-3 w-3 ${scanning === system.id ? 'animate-spin' : ''}`} />
+                  <RefreshCw
+                    className={`mr-2 h-3 w-3 ${scanning === system.id ? "animate-spin" : ""}`}
+                  />
                   Scan
                 </Button>
                 <Button
@@ -603,9 +687,9 @@ function SystemsContent() {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  const newPage = page - 1
-                  setPage(newPage)
-                  router.push(`/dashboard/systems?page=${newPage}`)
+                  const newPage = page - 1;
+                  setPage(newPage);
+                  router.push(`/dashboard/systems?page=${newPage}`);
                 }}
                 disabled={page === 1}
                 className="font-mono text-xs h-8 rounded-sm"
@@ -615,37 +699,37 @@ function SystemsContent() {
               </Button>
               <div className="flex items-center gap-1">
                 {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                  let pageNum = i + 1
+                  let pageNum = i + 1;
                   if (totalPages > 5 && page > 3) {
-                    pageNum = page - 3 + i
-                    if (pageNum > totalPages) pageNum = totalPages - (4 - i)
+                    pageNum = page - 3 + i;
+                    if (pageNum > totalPages) pageNum = totalPages - (4 - i);
                   }
-                  const isActive = pageNum === page
+                  const isActive = pageNum === page;
                   return (
                     <button
                       key={pageNum}
                       onClick={() => {
-                        setPage(pageNum)
-                        router.push(`/dashboard/systems?page=${pageNum}`)
+                        setPage(pageNum);
+                        router.push(`/dashboard/systems?page=${pageNum}`);
                       }}
                       className={`w-8 h-8 text-xs font-mono rounded border transition-colors ${
                         isActive
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'bg-background border-border/60 hover:bg-muted/20'
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-background border-border/60 hover:bg-muted/20"
                       }`}
                     >
                       {pageNum}
                     </button>
-                  )
+                  );
                 })}
               </div>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  const newPage = page + 1
-                  setPage(newPage)
-                  router.push(`/dashboard/systems?page=${newPage}`)
+                  const newPage = page + 1;
+                  setPage(newPage);
+                  router.push(`/dashboard/systems?page=${newPage}`);
                 }}
                 disabled={page === totalPages}
                 className="font-mono text-xs h-8 rounded-sm"
@@ -671,7 +755,9 @@ function SystemsContent() {
             </AlertDialogTitle>
             <AlertDialogDescription className="text-sm">
               This will permanently delete this system from your infrastructure monitor.
-              <span className="text-rose-400 font-mono text-xs block mt-2">THIS_ACTION_CANNOT_BE_UNDONE</span>
+              <span className="text-rose-400 font-mono text-xs block mt-2">
+                THIS_ACTION_CANNOT_BE_UNDONE
+              </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -686,20 +772,22 @@ function SystemsContent() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  )
+  );
 }
 
 export default function SystemsPage() {
   return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-6 w-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-          <p className="text-xs text-muted-foreground font-mono">LOADING_SYSTEMS...</p>
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="flex flex-col items-center gap-3">
+            <div className="h-6 w-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+            <p className="text-xs text-muted-foreground font-mono">LOADING_SYSTEMS...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <SystemsContent />
     </Suspense>
-  )
+  );
 }

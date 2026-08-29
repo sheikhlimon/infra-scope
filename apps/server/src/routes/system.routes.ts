@@ -26,7 +26,10 @@ router.put("/:id", SystemController.updateSystemController);
 // DELETE /api/systems/:id - Delete system (admin only)
 router.delete("/:id", requireRole(["ADMIN"]), SystemController.deleteSystemController);
 
-// POST /api/systems/:id/scan - Simulate scanning a system
+// POST /api/systems/sync-ansible - Sync inventory from Fedora Ansible repository
+router.post("/sync-ansible", SystemController.syncAnsibleController);
+
+// POST /api/systems/:id/scan - Live scan a system
 router.post("/:id/scan", SystemController.scanSystemController);
 
 export default router;
