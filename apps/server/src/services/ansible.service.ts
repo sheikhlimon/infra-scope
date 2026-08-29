@@ -6,7 +6,8 @@ import { infraEvents } from "./events.service.js";
 import * as ActivityService from "./activity.service.js";
 
 const DEFAULT_INVENTORY_DIR =
-  process.env.ANSIBLE_INVENTORY_PATH || "/home/limon/projects/fork/fedora/ansible/inventory";
+  process.env.ANSIBLE_INVENTORY_PATH ||
+  path.resolve(process.cwd(), "../../fork/fedora/ansible/inventory");
 
 export interface ParsedAnsibleHost {
   hostname: string;
@@ -21,7 +22,9 @@ export interface ParsedAnsibleHost {
 
 export function parseAnsibleInventory(inventoryDir = DEFAULT_INVENTORY_DIR): ParsedAnsibleHost[] {
   if (!fs.existsSync(inventoryDir)) {
-    throw new Error(`Ansible inventory directory not found at: ${inventoryDir}`);
+    throw new Error(
+      `Ansible inventory directory not found at: ${inventoryDir}. Set ANSIBLE_INVENTORY_PATH in environment or sync from CLI.`
+    );
   }
 
   const hostVarsDir = path.join(inventoryDir, "host_vars");

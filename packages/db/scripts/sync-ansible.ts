@@ -5,7 +5,9 @@ import yaml from "yaml";
 
 const prisma = new PrismaClient();
 
-const DEFAULT_INVENTORY_DIR = "/home/limon/projects/fork/fedora/ansible/inventory";
+const DEFAULT_INVENTORY_DIR =
+  process.env.ANSIBLE_INVENTORY_PATH ||
+  path.resolve(process.cwd(), "../../fork/fedora/ansible/inventory");
 const ADMIN_EMAIL = "admin@infrascope.dev";
 
 export interface ParsedAnsibleHost {
