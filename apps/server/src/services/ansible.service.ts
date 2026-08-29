@@ -12,6 +12,8 @@ export interface ParsedAnsibleHost {
   hostname: string;
   ipAddress: string;
   os: string;
+  cpuCores: number;
+  memoryGB: number;
   datacenter?: string;
   vmhost?: string;
   groups: string[];
@@ -100,10 +102,36 @@ export function parseAnsibleInventory(inventoryDir = DEFAULT_INVENTORY_DIR): Par
 
       const groups = Array.from(hostGroups.get(hostname) || []);
 
+      // Extract CPU cores
+      let cpuCores = 4;
+      if (data.num_cpus) cpuCores = parseInt(String(data.num_cpus), 10) || 4;
+      else if (data.cpus) cpuCores = parseInt(String(data.cpus), 10) || 4;
+      else if (/buildhw|bvmhost|vmhost/i.test(hostname)) cpuCores = 32;
+      else if (/db-|koji/i.test(hostname)) cpuCores = 16;
+      else if (/buildvm/i.test(hostname)) cpuCores = 8;
+
+      // Extract Memory in GB
+      let memoryGB = 8;
+      const rawMem = data.mem_size || data.max_mem_size || data.memory;
+      if (rawMem && !String(rawMem).includes("{{")) {
+        const parsed = parseInt(String(rawMem), 10);
+        if (parsed > 0) {
+          memoryGB = parsed >= 1024 ? Math.round(parsed / 1024) : parsed;
+        }
+      } else if (/buildhw|bvmhost|vmhost/i.test(hostname)) {
+        memoryGB = 128;
+      } else if (/db-|koji/i.test(hostname)) {
+        memoryGB = 64;
+      } else if (/buildvm/i.test(hostname)) {
+        memoryGB = 16;
+      }
+
       parsedHosts.push({
         hostname,
         ipAddress: ip.trim(),
         os,
+        cpuCores,
+        memoryGB,
         datacenter: data.datacenter,
         vmhost: data.vmhost,
         groups: groups.slice(0, 5),
@@ -136,33 +164,45 @@ export async function syncAnsibleInventory(userId: number) {
   let createdCount = 0;
   let updatedCount = 0;
 
-  for (const host of hosts) {
-    const existingId = existingMap.get(host.hostname);
-    if (existingId) {
-      await prisma.system.update({
-        where: { id: existingId },
-        data: {
-          ipAddress: host.ipAddress,
-          os: host.os,
-          connectionType: "ansible",
-          credentialsConfigured: true,
-        },
-      });
-      updatedCount++;
-    } else {
-      await prisma.system.create({
-        data: {
-          hostname: host.hostname,
-          ipAddress: host.ipAddress,
-          os: host.os,
-          connectionType: "ansible",
-          credentialsConfigured: true,
-          status: "INACTIVE",
-          ownerId: userId,
-        },
-      });
-      createdCount++;
-    }
+  // Process in concurrent batches for speed
+  const BATCH_SIZE = 25;
+  for (let i = 0; i < hosts.length; i += BATCH_SIZE) {
+    const batch = hosts.slice(i, i + BATCH_SIZE);
+    await Promise.all(
+      batch.map(async (host) => {
+        const existingId = existingMap.get(host.hostname);
+        if (existingId) {
+          await prisma.system.update({
+            where: { id: existingId },
+            data: {
+              ipAddress: host.ipAddress,
+              os: host.os,
+              cpuCores: host.cpuCores,
+              memoryGB: host.memoryGB,
+              status: "ACTIVE",
+              connectionType: "ansible",
+              credentialsConfigured: true,
+            },
+          });
+          updatedCount++;
+        } else {
+          await prisma.system.create({
+            data: {
+              hostname: host.hostname,
+              ipAddress: host.ipAddress,
+              os: host.os,
+              cpuCores: host.cpuCores,
+              memoryGB: host.memoryGB,
+              connectionType: "ansible",
+              credentialsConfigured: true,
+              status: "ACTIVE",
+              ownerId: userId,
+            },
+          });
+          createdCount++;
+        }
+      })
+    );
   }
 
   await ActivityService.logActivity("ansible.synced", userId);
