@@ -36,6 +36,9 @@
     },
     "db:seed": {
       "cache": false
+    },
+    "db:sync-ansible": {
+      "cache": false
     }
   }
 }

@@ -1,3 +1,4 @@
+import { exec } from "child_process";
 import { prisma } from "@infra-scope/db";
 import type { CreateSystemInput, UpdateSystemInput } from "../schemas/system.schema.js";
 import * as ActivityService from "../services/activity.service.js";
@@ -14,7 +15,11 @@ export async function createSystem(userId: number, data: CreateSystemInput) {
     },
   });
   await ActivityService.logActivity("system.created", userId, system.id);
-  infraEvents.emitEvent("system.created", { systemId: system.id, hostname: system.hostname, ownerId: userId });
+  infraEvents.emitEvent("system.created", {
+    systemId: system.id,
+    hostname: system.hostname,
+    ownerId: userId,
+  });
   infraEvents.emitEvent("stats.updated", {});
   return system;
 }
@@ -62,7 +67,12 @@ export async function getSystemById(id: number, userId: number, userRole: string
   return system;
 }
 
-export async function updateSystem(id: number, userId: number, userRole: string, data: UpdateSystemInput) {
+export async function updateSystem(
+  id: number,
+  userId: number,
+  userRole: string,
+  data: UpdateSystemInput
+) {
   const system = await prisma.system.findUnique({ where: { id } });
 
   if (!system) {
@@ -103,6 +113,37 @@ export async function deleteSystem(id: number, userId: number, userRole: string)
   return { message: "System deleted" };
 }
 
+interface ProbeResult {
+  status: "ACTIVE" | "ERROR";
+  latencyMs: number;
+  method: "ping" | "unreachable";
+}
+
+export function probeSystem(hostname: string, ipAddress: string): Promise<ProbeResult> {
+  return new Promise((resolve) => {
+    const start = Date.now();
+    const target = hostname && !hostname.includes(" ") ? hostname : ipAddress;
+
+    // Fast, credential-free reachability check (no SSH login or OTP required)
+    exec(`ping -c 1 -W 2 ${target}`, { timeout: 3000 }, (pingError) => {
+      const latencyMs = Date.now() - start;
+      if (!pingError) {
+        return resolve({
+          status: "ACTIVE",
+          latencyMs,
+          method: "ping",
+        });
+      }
+
+      return resolve({
+        status: "ERROR",
+        latencyMs,
+        method: "unreachable",
+      });
+    });
+  });
+}
+
 export async function scanSystem(id: number, userId: number, userRole: string) {
   const system = await prisma.system.findUnique({ where: { id } });
 
@@ -116,26 +157,34 @@ export async function scanSystem(id: number, userId: number, userRole: string) {
 
   // Set status to scanning
   await prisma.system.update({ where: { id }, data: { status: "SCANNING" } });
-  infraEvents.emitEvent("system.status_changed", { systemId: id, status: "SCANNING", hostname: system.hostname });
-
-  // Simulate scan delay (3 seconds)
-  await new Promise(resolve => {
-    // eslint-disable-next-line no-undef
-    setTimeout(resolve, 3000);
+  infraEvents.emitEvent("system.status_changed", {
+    systemId: id,
+    status: "SCANNING",
+    hostname: system.hostname,
   });
 
-  // 80% success rate
-  const success = Math.random() > 0.2;
-  const status = success ? "ACTIVE" : "ERROR";
+  // Execute real live probe
+  const probe = await probeSystem(system.hostname, system.ipAddress);
 
   const updated = await prisma.system.update({
     where: { id },
-    data: { status, lastScannedAt: new Date() },
+    data: {
+      status: probe.status,
+      lastScannedAt: new Date(),
+    },
     include: { owner: { select: { id: true, email: true } } },
   });
 
-  await ActivityService.logActivity("system.scanned", userId, updated.id);
-  infraEvents.emitEvent("system.status_changed", { systemId: updated.id, status: updated.status, hostname: updated.hostname });
+  await ActivityService.logActivity(
+    `system.scanned (${probe.method}: ${probe.status}, ${probe.latencyMs}ms)`,
+    userId,
+    updated.id
+  );
+  infraEvents.emitEvent("system.status_changed", {
+    systemId: updated.id,
+    status: updated.status,
+    hostname: updated.hostname,
+  });
   infraEvents.emitEvent("stats.updated", {});
   return updated;
 }
