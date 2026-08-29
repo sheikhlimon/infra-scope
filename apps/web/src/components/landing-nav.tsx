@@ -11,7 +11,7 @@ export function LandingNav() {
   return (
     <nav className="border-b border-border/40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-        <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <Logo size="md" />
           <span className="font-mono text-base sm:text-lg font-bold tracking-tight">
             INFRA-SCOPE

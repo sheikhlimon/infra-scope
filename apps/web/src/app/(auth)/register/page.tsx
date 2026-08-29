@@ -1,72 +1,80 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { api } from '@/lib/api'
-import { useToast } from '@/hooks/use-toast'
-import { useAuth } from '@/contexts/auth-context'
-import { useServerWarmup } from '@/hooks/use-server-warmup'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card } from '@/components/ui/card'
-import { UserPlus, Eye, EyeOff, Clock, Loader2, CheckCircle } from 'lucide-react'
-import Link from 'next/link'
-import { Logo } from '@/components/logo'
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { api } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/auth-context";
+import { useServerWarmup } from "@/hooks/use-server-warmup";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
+import { UserPlus, Eye, EyeOff, Clock, Loader2, CheckCircle } from "lucide-react";
+import Link from "next/link";
+import { Logo } from "@/components/logo";
 
 export default function RegisterPage() {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-  const { status: serverStatus, attempt: retryAttempt, totalAttempts, retry: retryWarmup } = useServerWarmup()
-  const router = useRouter()
-  const { toast } = useToast()
-  const { login } = useAuth()
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const {
+    status: serverStatus,
+    attempt: retryAttempt,
+    totalAttempts,
+    retry: retryWarmup,
+  } = useServerWarmup();
+  const router = useRouter();
+  const { toast } = useToast();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (password !== confirmPassword) {
       toast({
-        title: 'VALIDATION_ERROR',
-        description: 'PASSWORDS_DO_NOT_MATCH',
-        variant: 'destructive',
-      })
-      return
+        title: "VALIDATION_ERROR",
+        description: "PASSWORDS_DO_NOT_MATCH",
+        variant: "destructive",
+      });
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
 
     try {
-      await api.post('/auth/register', { name, email, password })
-      await login(email, password)
-      router.push('/dashboard')
+      await api.post("/auth/register", { name, email, password });
+      await login(email, password);
+      router.push("/dashboard");
     } catch (err) {
       toast({
-        title: 'REGISTRATION_FAILED',
-        description: err instanceof Error ? err.message : 'Something went wrong',
-        variant: 'destructive',
-      })
+        title: "REGISTRATION_FAILED",
+        description: err instanceof Error ? err.message : "Something went wrong",
+        variant: "destructive",
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex bg-background">
       <div className="hidden md:flex md:w-1/3 bg-primary items-center justify-center relative overflow-hidden">
         {/* Decorative grid pattern */}
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `
               linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
               linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px)
             `,
-            backgroundSize: '32px 32px'
-          }} />
+              backgroundSize: "32px 32px",
+            }}
+          />
         </div>
 
         <div className="text-primary-foreground p-8 relative z-10">
@@ -106,7 +114,10 @@ export default function RegisterPage() {
 
           <div className="p-8">
             {/* Header */}
-            <div className="flex items-center gap-3 mb-8 pb-6 border-b border-border/40">
+            <Link
+              href="/"
+              className="flex items-center gap-3 mb-8 pb-6 border-b border-border/40 hover:opacity-85 transition-opacity"
+            >
               <Logo size="lg" />
               <div>
                 <h1 className="text-xl font-mono font-bold tracking-wider text-foreground">
@@ -116,12 +127,12 @@ export default function RegisterPage() {
                   Request_Access
                 </p>
               </div>
-            </div>
+            </Link>
 
             {/* Server status indicator */}
             <div className="mb-6 p-3 bg-muted/30 border border-border/40 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                {(serverStatus === 'checking' || serverStatus === 'warming') && (
+                {(serverStatus === "checking" || serverStatus === "warming") && (
                   <>
                     <Loader2 className="h-4 w-4 text-yellow-500 animate-spin" />
                     <span className="font-mono text-xs text-yellow-500">
@@ -129,23 +140,23 @@ export default function RegisterPage() {
                     </span>
                   </>
                 )}
-                {serverStatus === 'ready' && (
+                {serverStatus === "ready" && (
                   <>
                     <CheckCircle className="h-4 w-4 text-green-500" />
                     <span className="font-mono text-xs text-green-500">SERVER_READY</span>
                   </>
                 )}
-                {serverStatus === 'error' && (
+                {serverStatus === "error" && (
                   <>
                     <Clock className="h-4 w-4 text-red-500" />
                     <span className="font-mono text-xs text-red-500">SERVER_TIMEOUT</span>
                   </>
                 )}
               </div>
-              {(serverStatus === 'checking' || serverStatus === 'warming') && (
+              {(serverStatus === "checking" || serverStatus === "warming") && (
                 <span className="font-mono text-[10px] text-muted-foreground">~50s max</span>
               )}
-              {serverStatus === 'error' && (
+              {serverStatus === "error" && (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -167,7 +178,7 @@ export default function RegisterPage() {
                   type="text"
                   placeholder="John Doe"
                   value={name}
-                  onChange={e => setName(e.target.value)}
+                  onChange={(e) => setName(e.target.value)}
                   required
                   disabled={loading}
                   className="font-mono text-sm bg-muted/20 border-border/60 rounded-sm"
@@ -183,7 +194,7 @@ export default function RegisterPage() {
                   type="email"
                   placeholder="john@example.com"
                   value={email}
-                  onChange={e => setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={loading}
                   className="font-mono text-sm bg-muted/20 border-border/60 rounded-sm"
@@ -197,10 +208,10 @@ export default function RegisterPage() {
                 <div className="relative">
                   <Input
                     id="password"
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     value={password}
-                    onChange={e => setPassword(e.target.value)}
+                    onChange={(e) => setPassword(e.target.value)}
                     required
                     disabled={loading}
                     className="font-mono text-sm bg-muted/20 border-border/60 rounded-sm pr-10"
@@ -216,7 +227,10 @@ export default function RegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="font-mono text-xs uppercase tracking-wider">
+                <Label
+                  htmlFor="confirmPassword"
+                  className="font-mono text-xs uppercase tracking-wider"
+                >
                   Confirm_Key
                 </Label>
                 <Input
@@ -224,7 +238,7 @@ export default function RegisterPage() {
                   type="password"
                   placeholder="••••••••"
                   value={confirmPassword}
-                  onChange={e => setConfirmPassword(e.target.value)}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                   disabled={loading}
                   className="font-mono text-sm bg-muted/20 border-border/60 rounded-sm"
@@ -234,7 +248,7 @@ export default function RegisterPage() {
               <Button
                 type="submit"
                 className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-mono text-xs uppercase tracking-wider rounded-sm mt-4"
-                disabled={loading || serverStatus === 'warming' || serverStatus === 'checking'}
+                disabled={loading || serverStatus === "warming" || serverStatus === "checking"}
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -252,7 +266,7 @@ export default function RegisterPage() {
 
             <div className="mt-6 pt-6 border-t border-border/40 text-center">
               <p className="text-xs text-muted-foreground font-mono">
-                ALREADY_HAVE_ACCESS?{' '}
+                ALREADY_HAVE_ACCESS?{" "}
                 <Link href="/login" className="text-primary hover:underline">
                   SIGN_IN
                 </Link>
@@ -262,5 +276,5 @@ export default function RegisterPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

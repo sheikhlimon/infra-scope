@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 import { Server, Activity, LogOut, Cpu, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SSEProvider } from "@/contexts/sse-context";
+import { Logo } from "@/components/logo";
 
 const navItems = [
   { href: "/dashboard", label: "Overview", icon: Cpu },
@@ -34,10 +35,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <button onClick={() => setMobileMenuOpen(true)} className="p-2 hover:bg-muted rounded-sm">
             <Menu className="w-5 h-5" />
           </button>
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="w-6 h-6 border-2 border-primary flex items-center justify-center">
-              <div className="w-2 h-2 bg-primary" />
-            </div>
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-2 hover:opacity-85 transition-opacity"
+          >
+            <Logo size="sm" />
             <span className="font-mono text-sm font-bold tracking-tight">INFRA-SCOPE</span>
           </Link>
         </div>
@@ -63,10 +65,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       >
         {/* Brand */}
         <div className="p-4 md:p-6 border-b border-border/40 flex items-center justify-between">
-          <Link href="/dashboard" className="flex items-center gap-3">
-            <div className="w-7 h-7 border-2 border-primary flex items-center justify-center">
-              <div className="w-2.5 h-2.5 bg-primary" />
-            </div>
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-3 hover:opacity-85 transition-opacity"
+          >
+            <Logo size="md" />
             <div>
               <h1 className="font-mono text-sm font-bold tracking-tight text-foreground">
                 INFRA-SCOPE
