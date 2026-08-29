@@ -20,7 +20,7 @@ Instead of grepping hundreds of raw YAML files in a terminal, InfraScope ingests
 * **Fedora Live Pulse (Datagrepper Stream)**: Connects to the public Fedora Messaging archive to stream live Koji RPM builds, Bodhi releases, and infrastructure tasks with sub-second timestamps and direct task links.
 * **Zero-Bloat Separation of Concerns**: Separates local immutable audit logs (stored in PostgreSQL) from high-volume external message streams (queried statelessly on demand).
 * **Real-Time Reactive Streaming (SSE)**: Uses Server-Sent Events to push scan results, status changes, and inventory updates to connected browser sessions instantly.
-* **Automated 24-Hour Sync**: GitHub Actions workflow automatically checks Fedora Forge once every 24 hours to sync any new or updated edge servers directly into Neon PostgreSQL.
+* **Automated Weekly Cloud Sync**: GitHub Actions workflow automatically checks Fedora Forge once a week (or on demand) to sync any new or updated edge servers directly into Neon PostgreSQL.
 
 ---
 
