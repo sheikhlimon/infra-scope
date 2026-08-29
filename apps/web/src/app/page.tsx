@@ -1,78 +1,68 @@
-import Link from 'next/link'
-import Image from 'next/image'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Logo } from '@/components/logo'
-import { ArrowRight, Shield, Terminal, Activity, Database, Zap, Lock } from 'lucide-react'
+import Link from "next/link";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Logo } from "@/components/logo";
+import { ArrowRight, Shield, Terminal, Activity, Database, Zap, Lock } from "lucide-react";
 
 const FEATURES = [
   {
     icon: Terminal,
-    title: 'Linux Infrastructure',
-    description: 'Monitor and manage your Linux servers from a unified dashboard.',
+    title: "Linux Infrastructure",
+    description: "Monitor and manage your Linux servers from a unified dashboard.",
   },
   {
     icon: Shield,
-    title: 'Role-Based Access',
-    description: 'Admin and user roles with granular permissions.',
+    title: "Role-Based Access",
+    description: "Admin and user roles with granular permissions.",
   },
   {
     icon: Activity,
-    title: 'Real-Time Status',
-    description: 'Track system health with automated scanning and status monitoring.',
+    title: "Real-Time Status",
+    description: "Track system health with automated scanning and status monitoring.",
   },
   {
     icon: Database,
-    title: 'Activity Logging',
-    description: 'Complete audit trail of all system operations.',
+    title: "Activity Logging",
+    description: "Complete audit trail of all system operations.",
   },
   {
     icon: Zap,
-    title: 'Fast & Lightweight',
-    description: 'Built with modern stack for optimal performance.',
+    title: "Fast & Lightweight",
+    description: "Built with modern stack for optimal performance.",
   },
   {
     icon: Lock,
-    title: 'Secure by Default',
-    description: 'JWT authentication with bcrypt password hashing.',
+    title: "Secure by Default",
+    description: "JWT authentication with bcrypt password hashing.",
   },
-]
+];
+
+import { LandingNav } from "@/components/landing-nav";
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background">
-      <nav className="border-b border-border/40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Logo size="md" />
-            <span className="font-mono text-base sm:text-lg font-bold tracking-tight">INFRA-SCOPE</span>
-          </div>
-          <div className="flex items-center gap-2 sm:gap-4">
-            <Link href="/login">
-              <Button variant="ghost" size="sm" className="font-mono text-xs sm:text-sm">Sign In</Button>
-            </Link>
-            <Link href="/register">
-              <Button size="sm" className="font-mono text-xs sm:text-sm rounded-sm">Get Started</Button>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <LandingNav />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16 md:py-24">
         <div className="text-center mb-16 sm:mb-24">
           <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary/10 border border-primary/30 rounded-sm mb-6 sm:mb-8">
             <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
-            <span className="text-[10px] sm:text-xs font-mono text-primary">v1.0 — Infrastructure Discovery Management</span>
+            <span className="text-[10px] sm:text-xs font-mono text-primary">
+              v1.0 — Infrastructure Discovery Management
+            </span>
           </div>
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-mono font-bold tracking-tight mb-4 sm:mb-6">
-            Know Your<br />
+            Know Your
+            <br />
             <span className="text-primary">Infrastructure</span>
           </h1>
 
           <p className="text-sm sm:text-base lg:text-lg text-muted-foreground max-w-2xl mx-auto mb-8 sm:mb-12 font-mono px-2">
-            Centralized monitoring and management for Linux infrastructure.
-            Track systems, automate scans, and maintain complete visibility.
+            Centralized monitoring and management for Linux infrastructure. Track systems, automate
+            scans, and maintain complete visibility.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 px-4">
@@ -83,7 +73,11 @@ export default function LandingPage() {
               </Button>
             </Link>
             <Link href="/login" className="w-full sm:w-auto">
-              <Button size="lg" variant="outline" className="font-mono text-sm rounded-sm w-full sm:w-auto">
+              <Button
+                size="lg"
+                variant="outline"
+                className="font-mono text-sm rounded-sm w-full sm:w-auto"
+              >
                 Access Dashboard
               </Button>
             </Link>
@@ -102,7 +96,9 @@ export default function LandingPage() {
                 <div className="w-2 h-2 rounded-full bg-rose-500" />
                 <div className="w-2 h-2 rounded-full bg-amber-500" />
                 <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span className="ml-2 text-[10px] font-mono text-muted-foreground/60">admin-dashboard</span>
+                <span className="ml-2 text-[10px] font-mono text-muted-foreground/60">
+                  admin-dashboard
+                </span>
               </div>
               <Image
                 src="/admin.png"
@@ -121,7 +117,7 @@ export default function LandingPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {FEATURES.map((feature, i) => {
-            const Icon = feature.icon
+            const Icon = feature.icon;
             return (
               <Card key={i} className="p-4 sm:p-6 border-border/60 relative overflow-hidden group">
                 <div className="absolute top-0 left-0 w-6 h-6 border-t border-l border-primary/30 group-hover:border-primary/60 transition-colors" />
@@ -131,11 +127,9 @@ export default function LandingPage() {
                 <h3 className="text-sm font-mono font-bold uppercase tracking-wider mb-2">
                   {feature.title}
                 </h3>
-                <p className="text-sm text-muted-foreground">
-                  {feature.description}
-                </p>
+                <p className="text-sm text-muted-foreground">{feature.description}</p>
               </Card>
-            )
+            );
           })}
         </div>
 
@@ -143,7 +137,9 @@ export default function LandingPage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8 text-center">
             <div>
               <p className="text-2xl sm:text-3xl font-mono font-bold text-foreground mb-1">Zero</p>
-              <p className="text-[10px] sm:text-xs text-muted-foreground font-mono">Config Required</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground font-mono">
+                Config Required
+              </p>
             </div>
             <div>
               <p className="text-2xl sm:text-3xl font-mono font-bold text-foreground mb-1">100%</p>
@@ -151,10 +147,14 @@ export default function LandingPage() {
             </div>
             <div>
               <p className="text-2xl sm:text-3xl font-mono font-bold text-foreground mb-1">JWT</p>
-              <p className="text-[10px] sm:text-xs text-muted-foreground font-mono">Auth Security</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground font-mono">
+                Auth Security
+              </p>
             </div>
             <div>
-              <p className="text-2xl sm:text-3xl font-mono font-bold text-foreground mb-1">PostgreSQL</p>
+              <p className="text-2xl sm:text-3xl font-mono font-bold text-foreground mb-1">
+                PostgreSQL
+              </p>
               <p className="text-[10px] sm:text-xs text-muted-foreground font-mono">Database</p>
             </div>
           </div>
@@ -169,7 +169,7 @@ export default function LandingPage() {
               <span className="text-xs font-mono text-muted-foreground">INFRA-SCOPE</span>
             </div>
             <p className="text-[10px] sm:text-xs text-muted-foreground font-mono text-center sm:text-right">
-              Built by{' '}
+              Built by{" "}
               <a
                 href="https://github.com/sheikhlimon"
                 target="_blank"
@@ -177,12 +177,12 @@ export default function LandingPage() {
                 className="text-primary hover:underline"
               >
                 Sheikh Limon
-              </a>{' '}
+              </a>{" "}
               with Next.js 16 + Express + Prisma
             </p>
           </div>
         </div>
       </footer>
     </div>
-  )
+  );
 }

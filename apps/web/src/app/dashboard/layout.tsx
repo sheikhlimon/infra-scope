@@ -1,48 +1,45 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useAuth } from '@/contexts/auth-context'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { Server, Activity, LogOut, Cpu, Menu, X } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { SSEProvider } from '@/contexts/sse-context'
+import { useState } from "react";
+import { useAuth } from "@/contexts/auth-context";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Server, Activity, LogOut, Cpu, Menu, X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { SSEProvider } from "@/contexts/sse-context";
 
 const navItems = [
-  { href: '/dashboard', label: 'Overview', icon: Cpu },
-  { href: '/dashboard/systems', label: 'Systems', icon: Server },
-  { href: '/dashboard/activity', label: 'Activity', icon: Activity },
-]
+  { href: "/dashboard", label: "Overview", icon: Cpu },
+  { href: "/dashboard/systems", label: "Systems", icon: Server },
+  { href: "/dashboard/activity", label: "Activity", icon: Activity },
+];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const { user, logout } = useAuth()
-  const router = useRouter()
-  const pathname = usePathname()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
 
   const handleLogout = () => {
-    logout()
-    router.push('/')
-  }
+    logout();
+    router.push("/");
+  };
 
   return (
     <div className="min-h-screen bg-background">
       {/* Mobile header */}
       <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-card border-b border-border/40 flex items-center justify-between px-4 z-40">
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => setMobileMenuOpen(true)}
-            className="p-2 hover:bg-muted rounded-sm"
-          >
+          <button onClick={() => setMobileMenuOpen(true)} className="p-2 hover:bg-muted rounded-sm">
             <Menu className="w-5 h-5" />
           </button>
-          <div className="flex items-center gap-2">
+          <Link href="/dashboard" className="flex items-center gap-2">
             <div className="w-6 h-6 border-2 border-primary flex items-center justify-center">
               <div className="w-2 h-2 bg-primary" />
             </div>
             <span className="font-mono text-sm font-bold tracking-tight">INFRA-SCOPE</span>
-          </div>
+          </Link>
         </div>
         <div className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
           {user?.role}
@@ -66,7 +63,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       >
         {/* Brand */}
         <div className="p-4 md:p-6 border-b border-border/40 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
+          <Link href="/dashboard" className="flex items-center gap-3">
             <div className="w-7 h-7 border-2 border-primary flex items-center justify-center">
               <div className="w-2.5 h-2.5 bg-primary" />
             </div>
@@ -87,8 +84,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-1">
           {navItems.map((item) => {
-            const Icon = item.icon
-            const isActive = pathname === item.href
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
             return (
               <Link
                 key={item.href}
@@ -104,7 +101,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <Icon className="w-4 h-4" />
                 {item.label}
               </Link>
-            )
+            );
           })}
         </nav>
 
@@ -131,11 +128,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Main Content */}
       <main className="md:ml-64 pt-16 md:pt-0">
         <div className="p-4 md:p-8">
-          <SSEProvider>
-            {children}
-          </SSEProvider>
+          <SSEProvider>{children}</SSEProvider>
         </div>
       </main>
     </div>
-  )
+  );
 }
