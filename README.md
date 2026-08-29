@@ -1,28 +1,22 @@
 # InfraScope
 
-> Full-stack infrastructure inventory explorer, live reachability prober, and real-time event dashboard built with Next.js 16, Express, Prisma, and PostgreSQL in a Turborepo monorepo.
-
----
+> Full-stack infrastructure catalog, live reachability prober, and real-time event dashboard built with Next.js 16, Express, Prisma, and PostgreSQL in a Turborepo monorepo.
 
 ## What Is InfraScope?
 
-**InfraScope** is a visual infrastructure catalog and management platform designed to turn complex, flat Infrastructure-as-Code repositories into an interactive web interface.
+**InfraScope** is a visual infrastructure catalog and management platform designed to turn complex Infrastructure-as-Code repositories into an interactive web interface.
 
-Instead of grepping hundreds of raw YAML files in a terminal, InfraScope ingests and visualizes **41 real public edge servers from the Fedora Linux Project's Ansible repository** (global reverse proxies, authoritative nameservers, distribution mirrors, and cloud nodes), runs credential-free reachability probes with live latency measurement, and streams live RPM builds and infrastructure events directly from the Fedora Messaging bus (via Datagrepper).
-
----
+Instead of grepping raw YAML files in a terminal, InfraScope ingests and visualizes **41 real public edge servers from the Fedora Linux Project's Ansible repository** (global reverse proxies, authoritative nameservers, distribution mirrors, and cloud nodes), runs credential-free reachability probes with live latency measurement, and streams real-time package builds and updates directly from the Fedora Messaging bus (via Datagrepper).
 
 ## Key Features
 
-* **Fedora Public Edge Fleet**: Ingests and maps ~40 real enterprise edge servers across global AWS regions and partner datacenters (Europe, North America, Asia), including reverse proxies (`proxy02`–`proxy40`), DNS nameservers (`ns02`, `ns05`), BitTorrent trackers, and mirrors.
+* **Fedora Public Edge Fleet**: Ingests and maps 41 real enterprise edge servers across global AWS regions and partner datacenters (Europe, North America, Asia), including reverse proxies (`proxy02`–`proxy40`), DNS nameservers (`ns02`, `ns05`), BitTorrent trackers, and mirrors.
 * **100% Live Reachability & Latency**: Every monitored node is publicly routable and verifiable via ICMP echo or TCP port 443 handshakes with live round-trip latency tracking.
 * **Automated Spec Extraction**: Extracts real hardware capacities and operating system distributions (Red Hat Enterprise Linux, Fedora Server, CentOS Stream) directly from Ansible `host_vars`.
 * **Fedora Live Pulse (Datagrepper Stream)**: Connects to the public Fedora Messaging archive to stream live Koji RPM builds, Bodhi releases, and infrastructure tasks with sub-second timestamps and direct task links.
 * **Zero-Bloat Separation of Concerns**: Separates local immutable audit logs (stored in PostgreSQL) from high-volume external message streams (queried statelessly on demand).
 * **Real-Time Reactive Streaming (SSE)**: Uses Server-Sent Events to push scan results, status changes, and inventory updates to connected browser sessions instantly.
 * **Automated Weekly Cloud Sync**: GitHub Actions workflow automatically checks Fedora Forge once a week (or on demand) to sync any new or updated edge servers directly into Neon PostgreSQL.
-
----
 
 ## Architecture
 
@@ -47,8 +41,6 @@ Instead of grepping hundreds of raw YAML files in a terminal, InfraScope ingests
 └───────────────────────┘ └──────────────────────┘ └──────────────────────┘
 ```
 
----
-
 ## Tech Stack
 
 | Layer | Technology | Description |
@@ -57,12 +49,10 @@ Instead of grepping hundreds of raw YAML files in a terminal, InfraScope ingests
 | **Styling** | Tailwind CSS, shadcn/ui, Lucide Icons | Accessible, high-contrast terminal-inspired UI |
 | **Backend** | Express 4, TypeScript | Strict `service → controller → route` layered API |
 | **Database** | PostgreSQL (Neon Serverless), Prisma ORM | Relational modeling with migrations and connection pooling |
-| **Data Source** | Fedora Project Ansible Repository | 399 hosts, group hierarchies, and hardware specs |
+| **Data Source** | Fedora Project Ansible Repository | 41 public edge hosts, group hierarchies, and hardware specs |
 | **Live Stream** | Fedora Messaging (Datagrepper REST API) | Real-time Koji builds, Bodhi updates, and git events |
 | **Monorepo** | Turborepo, npm workspaces | Coordinated builds, shared ESLint/TS configs |
 | **Runtime** | Node.js 24 | Managed via `.nvmrc` with strict engine enforcement |
-
----
 
 ## Project Structure
 
@@ -76,7 +66,7 @@ infra-scope/
 │   └── server/                 # Express REST API backend
 │       └── src/
 │           ├── controllers/    # Express request controllers
-│           ├── services/       # Ansible ingestion, reachability probe, Datagrepper
+│           ├── services/       # Reachability probes, Datagrepper client
 │           ├── routes/         # Authenticated route declarations
 │           └── schemas/        # Zod request validation schemas
 ├── packages/
@@ -84,8 +74,6 @@ infra-scope/
 │   └── config/                 # Shared base ESLint flat configs and tsconfigs
 └── turbo.json                  # Turborepo task pipeline
 ```
-
----
 
 ## Getting Started
 
@@ -123,7 +111,7 @@ npm run db:push
 # Seed admin user (admin@infrascope.dev / admin123)
 npm run db:seed
 
-# Ingest Fedora Ansible inventory (optional CLI sync)
+# Ingest Fedora Ansible inventory (CLI sync)
 npm run db:sync-ansible
 ```
 
@@ -133,26 +121,22 @@ npm run dev
 ```
 Open **`http://localhost:3000`** in your browser and sign in with `admin@infrascope.dev` / `admin123`.
 
----
-
-## Quality & Verification
+## Quality & Releases
 
 Every package is strictly checked with zero TypeScript or ESLint warnings:
 
 ```bash
-npm run check    # runs lint + typecheck across all 4 monorepo packages
-npm run build    # builds all packages in dependency order via Turborepo
+npm run check             # runs lint + typecheck across all 4 monorepo packages
+npm run build             # builds all packages in dependency order via Turborepo
+npm run release           # automated version bump, changelog update, and tag
+npm run release:dry-run   # simulate version bump without modifying git
 ```
-
----
 
 ## Cloud Deployment
 
 * **Frontend (Vercel)**: Point Vercel to `apps/web`. Set `NEXT_PUBLIC_API_URL` to your production Render API URL.
 * **Backend (Render)**: Deploy `apps/server` as a Node Web Service. Configure `DATABASE_URL` and `JWT_SECRET`.
 * **Database (Neon)**: Serverless PostgreSQL connects automatically over SSL.
-
----
 
 ## License
 
