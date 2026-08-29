@@ -1,6 +1,5 @@
 import type { Response } from "express";
 import * as SystemService from "../services/system.service.js";
-import * as AnsibleService from "../services/ansible.service.js";
 import type { CreateSystemInput, UpdateSystemInput } from "../schemas/system.schema.js";
 import type { AuthRequest } from "../middleware/auth.middleware.js";
 
@@ -78,15 +77,6 @@ export async function getSystemStatsController(req: AuthRequest, res: Response) 
   try {
     const stats = await SystemService.getSystemStats(req.user!.userId, req.user!.role);
     res.status(200).json(stats);
-  } catch (error) {
-    res.status(500).json({ error: (error as Error).message });
-  }
-}
-
-export async function syncAnsibleController(req: AuthRequest, res: Response) {
-  try {
-    const result = await AnsibleService.syncAnsibleInventory(req.user!.userId);
-    res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ error: (error as Error).message });
   }

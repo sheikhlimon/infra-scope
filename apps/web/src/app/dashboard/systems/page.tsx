@@ -6,7 +6,6 @@ import { useAuth } from "@/contexts/auth-context";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { useSSEEvents } from "@/contexts/sse-context";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -92,7 +91,6 @@ function SystemsContent() {
   const [systems, setSystems] = useState<System[]>([]);
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState<number | null>(null);
-  const [syncing, setSyncing] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<
@@ -176,32 +174,6 @@ function SystemsContent() {
     }
   };
 
-  const handleSyncAnsible = async () => {
-    setSyncing(true);
-    try {
-      const res = await api.post<{
-        success: boolean;
-        total: number;
-        created: number;
-        updated: number;
-        message: string;
-      }>("/systems/sync-ansible", {});
-      toast({
-        title: "Ansible Sync Complete",
-        description: res.message || `Synced ${res.total} systems from Fedora Ansible.`,
-      });
-      fetchSystems();
-    } catch (err) {
-      toast({
-        title: "Sync failed",
-        description: err instanceof Error ? err.message : "Failed to sync from Fedora Ansible",
-        variant: "destructive",
-      });
-    } finally {
-      setSyncing(false);
-    }
-  };
-
   const handleDelete = async () => {
     if (!deleteId) return;
     try {
@@ -263,15 +235,6 @@ function SystemsContent() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              onClick={handleSyncAnsible}
-              disabled={syncing}
-              className="font-mono text-xs border-border/80"
-            >
-              <RefreshCw className={cn("mr-2 h-3 w-3", syncing && "animate-spin")} />
-              {syncing ? "SYNCING..." : "SYNC_ANSIBLE"}
-            </Button>
             <Button
               onClick={() => router.push("/dashboard/systems/new")}
               className="bg-primary text-primary-foreground hover:bg-primary/90 font-mono text-xs"
