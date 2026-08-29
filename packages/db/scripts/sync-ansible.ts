@@ -5,9 +5,24 @@ import yaml from "yaml";
 
 const prisma = new PrismaClient();
 
-const DEFAULT_INVENTORY_DIR =
-  process.env.ANSIBLE_INVENTORY_PATH ||
-  path.resolve(process.cwd(), "../../fork/fedora/ansible/inventory");
+function resolveInventoryDir(): string {
+  if (process.env.ANSIBLE_INVENTORY_PATH && fs.existsSync(process.env.ANSIBLE_INVENTORY_PATH)) {
+    return process.env.ANSIBLE_INVENTORY_PATH;
+  }
+  const cwd = process.cwd();
+  const candidates = [
+    path.resolve(cwd, "../../../../fork/fedora/ansible/inventory"),
+    path.resolve(cwd, "../../../fork/fedora/ansible/inventory"),
+    path.resolve(cwd, "../../fork/fedora/ansible/inventory"),
+    path.resolve(cwd, "inventory"),
+  ];
+  for (const c of candidates) {
+    if (fs.existsSync(c)) return c;
+  }
+  return process.env.ANSIBLE_INVENTORY_PATH || candidates[0];
+}
+
+const DEFAULT_INVENTORY_DIR = resolveInventoryDir();
 const ADMIN_EMAIL = "admin@infrascope.dev";
 
 export interface ParsedAnsibleHost {
@@ -128,6 +143,10 @@ export function parseAnsibleInventory(inventoryDir = DEFAULT_INVENTORY_DIR): Par
         memoryGB = 16;
       }
 
+      if (!isPublicEdgeHost(hostname, ip)) {
+        continue;
+      }
+
       parsedHosts.push({
         hostname,
         ipAddress: ip.trim(),
@@ -144,6 +163,45 @@ export function parseAnsibleInventory(inventoryDir = DEFAULT_INVENTORY_DIR): Par
   }
 
   return parsedHosts;
+}
+
+export function isPublicEdgeHost(hostname: string, ip: string): boolean {
+  const h = hostname.toLowerCase();
+
+  // Exclude private RFC1918 subnets
+  if (ip.startsWith("10.") || ip.startsWith("192.168.") || ip.startsWith("172.")) {
+    return false;
+  }
+
+  // Exclude internal datacenter domains
+  if (h.includes(".rdu3.") || h.includes(".stg.") || h.includes(".s390.")) {
+    return false;
+  }
+
+  // Include public Fedora edge infrastructure
+  if (
+    h.includes("proxy") ||
+    h.includes("bastion") ||
+    h.includes("ns0") ||
+    h.includes("ns1") ||
+    h.includes("torrent") ||
+    h.includes("download") ||
+    h.includes("copr-fe") ||
+    h.includes("people") ||
+    h.includes("aarch64-test") ||
+    h.includes("osuosl") ||
+    h.includes("ibiblio")
+  ) {
+    return true;
+  }
+
+  // Public IPv4 addresses
+  const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
+  if (ipv4Regex.test(ip)) {
+    return true;
+  }
+
+  return false;
 }
 
 async function main() {
@@ -173,6 +231,17 @@ async function main() {
   });
   if (deletedMock.count > 0) {
     console.log(`Removed ${deletedMock.count} mock preseeded systems.`);
+  }
+
+  // Prune internal private hosts not in the public edge fleet
+  const activeEdgeHostnames = hosts.map((h) => h.hostname);
+  const pruned = await prisma.system.deleteMany({
+    where: {
+      hostname: { notIn: activeEdgeHostnames },
+    },
+  });
+  if (pruned.count > 0) {
+    console.log(`Pruned ${pruned.count} internal private hosts from database.`);
   }
 
   // Fetch all existing systems to avoid duplicate inserts

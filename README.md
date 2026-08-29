@@ -8,19 +8,19 @@
 
 **InfraScope** is a visual infrastructure catalog and management platform designed to turn complex, flat Infrastructure-as-Code repositories into an interactive web interface.
 
-Instead of grepping hundreds of raw YAML files in a terminal, InfraScope ingests and visualizes **399 real production and staging servers from the Fedora Linux Project's Ansible repository**, runs credential-free reachability probes, and streams live RPM builds and infrastructure events directly from the Fedora Messaging bus (via Datagrepper).
+Instead of grepping hundreds of raw YAML files in a terminal, InfraScope ingests and visualizes **41 real public edge servers from the Fedora Linux Project's Ansible repository** (global reverse proxies, authoritative nameservers, distribution mirrors, and cloud nodes), runs credential-free reachability probes with live latency measurement, and streams live RPM builds and infrastructure events directly from the Fedora Messaging bus (via Datagrepper).
 
 ---
 
 ## Key Features
 
-* **Fedora Infrastructure Fleet Catalog**: Ingests and maps ~400 real enterprise servers across RDU3, AWS, and cloud datacenters, including hypervisors (`vmhost-x86-*`), builder nodes, database clusters, and web proxies.
-* **Automated Spec Extraction**: Extracts real hardware capacities (CPU cores, RAM up to 256 GB) and operating system releases (Red Hat Enterprise Linux 10, Fedora 44 Server, CentOS Stream) directly from Ansible `host_vars`.
-* **Live Reachability Probes**: Measures live round-trip latency using ICMP echo and TCP handshake fallbacks without requiring SSH keys or 2FA/OTP passwords.
+* **Fedora Public Edge Fleet**: Ingests and maps ~40 real enterprise edge servers across global AWS regions and partner datacenters (Europe, North America, Asia), including reverse proxies (`proxy02`–`proxy40`), DNS nameservers (`ns02`, `ns05`), BitTorrent trackers, and mirrors.
+* **100% Live Reachability & Latency**: Every monitored node is publicly routable and verifiable via ICMP echo or TCP port 443 handshakes with live round-trip latency tracking.
+* **Automated Spec Extraction**: Extracts real hardware capacities and operating system distributions (Red Hat Enterprise Linux, Fedora Server, CentOS Stream) directly from Ansible `host_vars`.
 * **Fedora Live Pulse (Datagrepper Stream)**: Connects to the public Fedora Messaging archive to stream live Koji RPM builds, Bodhi releases, and infrastructure tasks with sub-second timestamps and direct task links.
 * **Zero-Bloat Separation of Concerns**: Separates local immutable audit logs (stored in PostgreSQL) from high-volume external message streams (queried statelessly on demand).
 * **Real-Time Reactive Streaming (SSE)**: Uses Server-Sent Events to push scan results, status changes, and inventory updates to connected browser sessions instantly.
-* **Pagination & Fleet Navigation**: Fast server-side paginated table supporting 25, 50, or 100 items per page with instant text search and status filtering.
+* **Automated 24-Hour Sync**: GitHub Actions workflow automatically checks Fedora Forge once every 24 hours to sync any new or updated edge servers directly into Neon PostgreSQL.
 
 ---
 
