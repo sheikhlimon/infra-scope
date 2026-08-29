@@ -99,8 +99,12 @@ function SystemsContent() {
     "ALL" | "ACTIVE" | "INACTIVE" | "SCANNING" | "ERROR"
   >("ALL");
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+  const [statusStats, setStatusStats] = useState<{ status: string; _count: { status: number } }[]>(
+    []
+  );
   const { user } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
@@ -115,10 +119,18 @@ function SystemsContent() {
 
   const fetchSystems = useCallback(async () => {
     try {
-      const data = await api.get<PaginatedSystemsResponse>(`/systems?page=${page}&limit=10`);
+      const [data, statsData] = await Promise.all([
+        api.get<PaginatedSystemsResponse>(`/systems?page=${page}&limit=${pageSize}`),
+        api.get<{ byStatus: { status: string; _count: { status: number } }[]; total: number }>(
+          "/systems/stats"
+        ),
+      ]);
       setSystems(data.systems);
       setTotalPages(data.pagination.totalPages);
       setTotal(data.pagination.total);
+      if (statsData?.byStatus) {
+        setStatusStats(statsData.byStatus);
+      }
     } catch (err) {
       toast({
         title: "Failed to load systems",
@@ -128,7 +140,7 @@ function SystemsContent() {
     } finally {
       setLoading(false);
     }
-  }, [page, toast]);
+  }, [page, pageSize, toast]);
 
   useEffect(() => {
     fetchSystems();
@@ -209,9 +221,15 @@ function SystemsContent() {
     }
   };
 
-  const activeCount = (systems || []).filter((s) => s.status === "ACTIVE").length;
-  const scanningCount = (systems || []).filter((s) => s.status === "SCANNING").length;
-  const errorCount = (systems || []).filter((s) => s.status === "ERROR").length;
+  const activeCount =
+    statusStats.find((s) => s.status === "ACTIVE")?._count.status ??
+    (systems || []).filter((s) => s.status === "ACTIVE").length;
+  const scanningCount =
+    statusStats.find((s) => s.status === "SCANNING")?._count.status ??
+    (systems || []).filter((s) => s.status === "SCANNING").length;
+  const errorCount =
+    statusStats.find((s) => s.status === "ERROR")?._count.status ??
+    (systems || []).filter((s) => s.status === "ERROR").length;
   const safeSystems = systems || [];
 
   const filteredSystems = (systems || []).filter((system) => {
@@ -678,10 +696,31 @@ function SystemsContent() {
       {/* Pagination */}
       {totalPages > 1 && (
         <Card className="p-4 border-border/60">
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-muted-foreground font-mono">
-              PAGE_{page}_OF_{totalPages} • {total}_TOTAL
-            </p>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <p className="text-xs text-muted-foreground font-mono">
+                PAGE_{page}_OF_{totalPages} • {total}_TOTAL
+              </p>
+              <div className="flex items-center gap-1">
+                <span className="text-[10px] text-muted-foreground font-mono">SHOW:</span>
+                {[25, 50, 100].map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => {
+                      setPageSize(size);
+                      setPage(1);
+                    }}
+                    className={`px-2 py-0.5 text-[10px] font-mono rounded border transition-colors ${
+                      pageSize === size
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-background border-border/60 hover:bg-muted/20 text-muted-foreground"
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
