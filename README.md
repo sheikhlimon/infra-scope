@@ -15,12 +15,13 @@ Instead of grepping raw YAML files in a terminal, InfraScope ingests and visuali
 * **Automated Spec Extraction**: Extracts real hardware capacities and operating system distributions (Red Hat Enterprise Linux, Fedora Server, CentOS Stream) directly from Ansible `host_vars`.
 * **Fedora Live Pulse (Datagrepper Stream)**: Connects to the public Fedora Messaging archive to stream live Koji RPM builds, Bodhi releases, and infrastructure tasks with sub-second timestamps and direct task links.
 * **Zero-Bloat Separation of Concerns**: Separates local immutable audit logs (stored in PostgreSQL) from high-volume external message streams (queried statelessly on demand).
-* **Real-Time Reactive Streaming (SSE)**: Uses Server-Sent Events to push scan results, status changes, and inventory updates to connected browser sessions instantly.
+* **Real-Time Reactive Streaming (SSE)**: Uses Server-Sent Events to push scan results, status changes, and inventory updates to connected browser sessions instantly. Features an **auto-stream toggle** in the UI to pause or resume live incoming events seamlessly.
 * **Automated Weekly Cloud Sync**: GitHub Actions workflow automatically checks Fedora Forge once a week (or on demand) to sync any new or updated edge servers directly into Neon PostgreSQL.
+* **Zero-Configuration Setup**: The local inventory CLI tool will automatically fetch, clone, and parse the upstream Ansible repository for you on first run.
 
 ## Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                           Next.js 16 Frontend                           │
 │              (React 19, Tailwind CSS, shadcn/ui on Vercel)              │
@@ -56,7 +57,7 @@ Instead of grepping raw YAML files in a terminal, InfraScope ingests and visuali
 
 ## Project Structure
 
-```
+```text
 infra-scope/
 ├── apps/
 │   ├── web/                    # Next.js 16 App Router frontend
@@ -72,14 +73,14 @@ infra-scope/
 ├── packages/
 │   ├── db/                     # Prisma schema, migrations, and CLI sync scripts
 │   └── config/                 # Shared base ESLint flat configs and tsconfigs
-└── turbo.json                  # Turborepo task pipeline
+└── turbo.json                  # Turborepo task pipeline (Strict Env Configured)
 ```
 
 ## Getting Started
 
 ### Prerequisites
 * **Node.js 24** (recommended: `nvm use` or `fnm use`)
-* A **PostgreSQL** database (e.g. Neon Serverless)
+* A **PostgreSQL** database (e.g., Neon Serverless)
 
 ### 1. Clone & Install
 ```bash
@@ -108,10 +109,15 @@ NEXT_PUBLIC_API_URL="http://localhost:3001/api"
 # Push Prisma schema to Neon PostgreSQL
 npm run db:push
 
+# (Optional) Generate the Prisma Client locally if needed
+npm run db:generate
+
 # Seed admin user (admin@infrascope.dev / admin123)
 npm run db:seed
 
-# Ingest Fedora Ansible inventory (CLI sync)
+# Ingest Fedora Ansible inventory
+# Note: If no local ./inventory folder is found, this script will automatically 
+# download and clone the Fedora Ansible repository to /tmp for you.
 npm run db:sync-ansible
 ```
 
@@ -132,11 +138,15 @@ npm run release           # automated version bump, changelog update, and tag
 npm run release:dry-run   # simulate version bump without modifying git
 ```
 
-## Cloud Deployment
+## Cloud Deployment Constraints
+
+This repository adheres to strict zero-credit-card serverless boundaries and architectural constraints:
 
 * **Frontend (Vercel)**: Point Vercel to `apps/web`. Set `NEXT_PUBLIC_API_URL` to your production Render API URL.
 * **Backend (Render)**: Deploy `apps/server` as a Node Web Service. Configure `DATABASE_URL` and `JWT_SECRET`.
+  * *Note*: The backend **must** stay on Render. Vercel serverless forcefully terminates persistent Server-Sent Events (SSE) after 15 seconds. Render's free tier sleeps after 15m idle; the frontend gracefully handles the 50s warmup.
 * **Database (Neon)**: Serverless PostgreSQL connects automatically over SSL.
+* **CI Inventory Sync (GitHub Actions)**: The automated inventory sync utilizes Turborepo. In CI environments, you must provide `ANSIBLE_INVENTORY_PATH` to the `db:sync-ansible` task to override the default local auto-cloning behavior.
 
 ## License
 
