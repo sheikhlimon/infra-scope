@@ -10,16 +10,16 @@ function resolveInventoryDir(): string {
     return process.env.ANSIBLE_INVENTORY_PATH;
   }
   const cwd = process.cwd();
-  const candidates = [
-    path.resolve(cwd, "../../../../fork/fedora/ansible/inventory"),
-    path.resolve(cwd, "../../../fork/fedora/ansible/inventory"),
-    path.resolve(cwd, "../../fork/fedora/ansible/inventory"),
-    path.resolve(cwd, "inventory"),
-  ];
+  const candidates = [path.resolve(cwd, "inventory")];
   for (const c of candidates) {
     if (fs.existsSync(c)) return c;
   }
-  return process.env.ANSIBLE_INVENTORY_PATH || candidates[0];
+
+  if (!process.env.ANSIBLE_INVENTORY_PATH) {
+    throw new Error("ANSIBLE_INVENTORY_PATH environment variable is required but not set.");
+  }
+
+  return process.env.ANSIBLE_INVENTORY_PATH;
 }
 
 const DEFAULT_INVENTORY_DIR = resolveInventoryDir();
