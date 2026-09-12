@@ -5,6 +5,8 @@ import yaml from "yaml";
 
 const prisma = new PrismaClient();
 
+import { execSync } from "child_process";
+
 function resolveInventoryDir(): string {
   if (process.env.ANSIBLE_INVENTORY_PATH && fs.existsSync(process.env.ANSIBLE_INVENTORY_PATH)) {
     return process.env.ANSIBLE_INVENTORY_PATH;
@@ -15,11 +17,20 @@ function resolveInventoryDir(): string {
     if (fs.existsSync(c)) return c;
   }
 
-  if (!process.env.ANSIBLE_INVENTORY_PATH) {
-    throw new Error("ANSIBLE_INVENTORY_PATH environment variable is required but not set.");
+  const tmpPath = "/tmp/fedora-ansible";
+  if (!fs.existsSync(path.join(tmpPath, "inventory"))) {
+    console.log(
+      "Inventory not found locally. Cloning upstream repository to /tmp/fedora-ansible..."
+    );
+    if (fs.existsSync(tmpPath)) {
+      fs.rmSync(tmpPath, { recursive: true, force: true });
+    }
+    execSync("git clone --depth 1 https://forge.fedoraproject.org/infra/ansible.git " + tmpPath, {
+      stdio: "inherit",
+    });
   }
 
-  return process.env.ANSIBLE_INVENTORY_PATH;
+  return path.join(tmpPath, "inventory");
 }
 
 const DEFAULT_INVENTORY_DIR = resolveInventoryDir();
