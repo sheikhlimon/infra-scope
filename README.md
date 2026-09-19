@@ -116,8 +116,8 @@ npm run db:generate
 npm run db:seed
 
 # Ingest Fedora Ansible inventory
-# Note: If no local ./inventory folder is found, this script will automatically 
-# download and clone the Fedora Ansible repository to /tmp for you.
+# Note: This script will automatically download and sync the upstream 
+# Fedora Ansible repository to /tmp/fedora-ansible for you.
 npm run db:sync-ansible
 ```
 
