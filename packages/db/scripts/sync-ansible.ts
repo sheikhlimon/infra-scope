@@ -11,21 +11,29 @@ function resolveInventoryDir(): string {
   if (process.env.ANSIBLE_INVENTORY_PATH && fs.existsSync(process.env.ANSIBLE_INVENTORY_PATH)) {
     return process.env.ANSIBLE_INVENTORY_PATH;
   }
-  const cwd = process.cwd();
-  const candidates = [path.resolve(cwd, "inventory")];
-  for (const c of candidates) {
-    if (fs.existsSync(c)) return c;
-  }
 
   const tmpPath = "/tmp/fedora-ansible";
-  if (!fs.existsSync(path.join(tmpPath, "inventory"))) {
+  const repoUrl = "https://forge.fedoraproject.org/infra/ansible.git";
+
+  if (fs.existsSync(tmpPath) && fs.existsSync(path.join(tmpPath, ".git"))) {
+    console.log("Updating upstream repository in /tmp/fedora-ansible...");
+    try {
+      execSync("git pull", { cwd: tmpPath, stdio: "inherit" });
+    } catch (e) {
+      console.log("Pull failed, re-cloning...");
+      fs.rmSync(tmpPath, { recursive: true, force: true });
+      execSync(`git clone --depth 1 ${repoUrl} ${tmpPath}`, {
+        stdio: "inherit",
+      });
+    }
+  } else {
     console.log(
       "Inventory not found locally. Cloning upstream repository to /tmp/fedora-ansible..."
     );
     if (fs.existsSync(tmpPath)) {
       fs.rmSync(tmpPath, { recursive: true, force: true });
     }
-    execSync("git clone --depth 1 https://forge.fedoraproject.org/infra/ansible.git " + tmpPath, {
+    execSync(`git clone --depth 1 ${repoUrl} ${tmpPath}`, {
       stdio: "inherit",
     });
   }
