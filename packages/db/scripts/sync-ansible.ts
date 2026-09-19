@@ -8,10 +8,6 @@ const prisma = new PrismaClient();
 import { execSync } from "child_process";
 
 function resolveInventoryDir(): string {
-  if (process.env.ANSIBLE_INVENTORY_PATH && fs.existsSync(process.env.ANSIBLE_INVENTORY_PATH)) {
-    return process.env.ANSIBLE_INVENTORY_PATH;
-  }
-
   const tmpPath = "/tmp/fedora-ansible";
   const repoUrl = "https://forge.fedoraproject.org/infra/ansible.git";
 

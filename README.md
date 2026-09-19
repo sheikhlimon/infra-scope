@@ -17,7 +17,7 @@ Instead of grepping raw YAML files in a terminal, InfraScope ingests and visuali
 * **Zero-Bloat Separation of Concerns**: Separates local immutable audit logs (stored in PostgreSQL) from high-volume external message streams (queried statelessly on demand).
 * **Real-Time Reactive Streaming (SSE)**: Uses Server-Sent Events to push scan results, status changes, and inventory updates to connected browser sessions instantly. Features an **auto-stream toggle** in the UI to pause or resume live incoming events seamlessly.
 * **Automated Weekly Cloud Sync**: GitHub Actions workflow automatically checks Fedora Forge once a week (or on demand) to sync any new or updated edge servers directly into Neon PostgreSQL.
-* **Zero-Configuration Setup**: The local inventory CLI tool will automatically fetch, clone, and parse the upstream Ansible repository for you on first run.
+* **Zero-Configuration Setup**: Automated inventory setup and synchronization by auto-cloning and updating the upstream Fedora Ansible repository for both local and CI environments.
 
 ## Architecture
 
@@ -146,7 +146,7 @@ This repository adheres to strict zero-credit-card serverless boundaries and arc
 * **Backend (Render)**: Deploy `apps/server` as a Node Web Service. Configure `DATABASE_URL` and `JWT_SECRET`.
   * *Note*: The backend **must** stay on Render. Vercel serverless forcefully terminates persistent Server-Sent Events (SSE) after 15 seconds. Render's free tier sleeps after 15m idle; the frontend gracefully handles the 50s warmup.
 * **Database (Neon)**: Serverless PostgreSQL connects automatically over SSL.
-* **CI Inventory Sync (GitHub Actions)**: The automated inventory sync utilizes Turborepo. In CI environments, you must provide `ANSIBLE_INVENTORY_PATH` to the `db:sync-ansible` task to override the default local auto-cloning behavior.
+* **CI Inventory Sync (GitHub Actions)**: The automated inventory sync utilizes Turborepo and relies on the script's zero-configuration auto-cloning logic in CI.
 
 ## License
 

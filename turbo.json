@@ -38,8 +38,7 @@
       "cache": false
     },
     "db:sync-ansible": {
-      "cache": false,
-      "env": ["ANSIBLE_INVENTORY_PATH"]
+      "cache": false
     }
   }
 }
